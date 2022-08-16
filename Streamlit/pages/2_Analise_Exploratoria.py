@@ -90,10 +90,20 @@ def main():
         mono_type_df = mono_type_.rename(columns={0: 'typing'})
         plt.figure(figsize=(3,2))
         plt.rcParams.update({'font.size': 4.5})
-        sns.displot(data=mono_type_df, x='typing', kde=True)
+        sns.displot(data=mono_type_df, y='typing', kde=True)
         st.pyplot(plt,clear_figure=True)
+
         st.write('\n')
+        # sns.set(rc={'figure.figsize':(15,30)})
+        # st.subheader('Pokémons com dois tipos')
+        # multi_type_df = multi_type_.rename(columns={0: 'typing'})
+        # plt.figure(figsize=(15,15))
+        # plt.rcParams.update({'font.size': 4.5})
+        # sns.displot(data=multi_type_df, y='typing', kde=True)
+        # st.pyplot(plt, clear_figure=True)
         
+        st.write('\n')
+
         st.subheader("Status por geração")
         plt.rcParams.update({'font.size': 7})
         sns.displot(data=ds_teste, x='gen_introduced', y='sum')
