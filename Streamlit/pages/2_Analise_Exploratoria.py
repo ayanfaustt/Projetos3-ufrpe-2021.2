@@ -1,3 +1,4 @@
+from copyreg import constructor
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -23,17 +24,7 @@ def main():
               'special_attack', 'special_defense', 'speed']
     path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.csv"
     ds = pd.read_csv(path_to_dataset)
-    types = ds['typing']
     
-    mono_type = list()
-    multi_type = list()
-    for i in types:
-        if '~' in i:
-            multi_type.append(i)
-        else:
-            mono_type.append(i) 
-    mono_type_ = pd.DataFrame(mono_type)
-    multi_type_ = pd.DataFrame(multi_type)
 
 
     if selected_option==option1:
@@ -77,39 +68,17 @@ def main():
         st.write("\n")
 
     elif selected_option==option2:
-        ds_teste = ds[skills]
-        ds_teste['gen_introduced'] = ds['gen_introduced']
-        sum_status = list()
 
-        for j in range(len(ds_teste)):
-            sum = ds_teste['hp'][j] + ds_teste['attack'][j] + ds_teste['defense'][j] + ds_teste['special_attack'][j] + ds_teste['special_defense'][j] + ds_teste['speed'][j]
-            sum_status.append(sum)
-        ds_teste['sum'] = sum_status
-        st.subheader("Disbribuição dos Pokémons por Tipos")
-        st.write("Pokémons com um tipo")
-        mono_type_df = mono_type_.rename(columns={0: 'typing'})
-        plt.figure(figsize=(3,2))
-        plt.rcParams.update({'font.size': 4.5})
-        sns.displot(data=mono_type_df, y='typing', kde=True)
-        st.pyplot(plt,clear_figure=True)
-
-        st.write('\n')
-        # sns.set(rc={'figure.figsize':(15,30)})
-        # st.subheader('Pokémons com dois tipos')
-        # multi_type_df = multi_type_.rename(columns={0: 'typing'})
-        # plt.figure(figsize=(15,15))
-        # plt.rcParams.update({'font.size': 4.5})
-        # sns.displot(data=multi_type_df, y='typing', kde=True)
-        # st.pyplot(plt, clear_figure=True)
+        
         
         st.write('\n')
+
+
 
         st.subheader("Status por geração")
-        plt.rcParams.update({'font.size': 7})
-        sns.displot(data=ds_teste, x='gen_introduced', y='sum')
-        st.pyplot(plt,clear_figure=True)
+
         
-        #st.pyplot(px.scatter(x=ds_teste['sum'], y=ds_teste['gen_introduced']))
+        #st.pyplot(px.scatter(x=ds_type_iterator['sum'], y=ds_type_iterator['gen_introduced']))
         
     elif selected_option==option3:
         st.header("Clusterização")
