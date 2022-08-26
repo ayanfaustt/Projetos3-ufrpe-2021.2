@@ -8,6 +8,7 @@ import os
 import plotly.express as px
 
 
+
 def main():
     option1 = "Análise Correlacional"
     option2 = "Análise basica"
