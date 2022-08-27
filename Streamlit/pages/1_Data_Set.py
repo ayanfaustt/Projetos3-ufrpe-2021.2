@@ -10,5 +10,6 @@ def main():
     st.title("Data Set")
     st.dataframe(ds,None)
     
+    
 if __name__ == '__main__':
     main()

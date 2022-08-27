@@ -1,0 +1,7 @@
+    ds.columns = ['Nome', 'N_Pokedex', 'Habilidades', 'Tipo', 'HP', 'Ataque', 'Defesa', 'Ataque_especial', 'Defesa_especial', 'Velocidade', 'Altura', 'Peso',
+    'Gênero', 'Geração', 'Taxa_de_fêmeas', 'Sem_gênero', 'Bebe_pokemon', 'Lendario', 'Mitico', 'Padrao', 'Forma_temporaria', 'XP_basico', 'Taxa_de_captura',
+    'Grupo_de_ovo', 'Ciclo_de_ovo', 'Felicidade_base', 'Evoluivel', 'Formas_evoluçao', 'Cor_primaria', 'Forma', 'Total_pokemons_do_mesmo_tipo',
+    'Vulnerabilidade_normal', 'Vulnerabilidade_fogo', 'Vulnerabilidade_agua', 'Vulnerabilidade_eletrico', 'Vulnerabilidade_planta', 'Vulnerabilidade_gelo',
+    'Vulnerabilidade_lutador', 'Vulnerabilidade_venenoso', 'Vulnerabilidade_terrestre', 'Vulnerabilidade_voador', 'Vulnerabilidade_pisiquico',
+    'Vulnerabilidade_inseto', 'Vulnerabilidade_pedra', 'Vulnerabilidade_fantasma','Vulnerabilidade_dragao', 'Vulnerabilidade_sombrio', 'Vulnerabilidade_aco',
+    'Vulnerabilidade_fada']
