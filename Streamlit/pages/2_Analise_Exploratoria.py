@@ -102,8 +102,8 @@ def main():
     option1 = "Analisando os dados Categóricos nominais"
     # Tela que exibe as analíses exploratorias feitas
     option2 = "Analisando os dados Quantitativos e Categóricos Ordinais"
-
-    option3 = "Parararara"
+    # Tela que exibe a distribuiíção das ocorrências
+    option3 = "Analisando a distribuição de ocorrencias"
     # Lista com nomes das telas
     option_list = [option1, option2, option3]
 
@@ -281,12 +281,12 @@ def main():
         st.markdown(markdown_ordinais_string)
         st.subheader("Verificando os outliers")
         st.write("É importante explicar que os outliers no contexto no contexto deste projeto devem ser interpretados como Pokemons que simplesmente estão acima da média e portanto não deve haver um tratamento para esses casos.")
-        colunas_boxplot = st.multiselect(
+        colunas_pairplot = st.multiselect(
             'Selecione até 4 colunas para o Boxplot', colunas_ordinais_quantitativas, key=1)
         usar_dados_normalizados = st.checkbox('Usar dados normalizados')
         if st.button('Gerar Boxplot'):
             with st.expander("Resultados:"):
-                n_colunas = len(colunas_boxplot)
+                n_colunas = len(colunas_pairplot)
                 if n_colunas > 4 or n_colunas < 1:
                     st.write("Selecione entre 1 e 4 colunas!")
                 else:
@@ -294,13 +294,13 @@ def main():
                     plt.figure(figsize=(5, 5))
                     ds_local = ds.copy()
                     if usar_dados_normalizados:
-                        for coluna in colunas_boxplot:
+                        for coluna in colunas_pairplot:
                             ds_local[coluna] = (ds[coluna]-ds[coluna].min()) / (
                                 ds[coluna].max()-ds[coluna].min())
 
-                    boxplot_data = pd.melt(
-                        ds_local, id_vars=['n_pokedex'], value_vars=colunas_boxplot)
-                    sns.boxplot(x='variable', y='value', data=boxplot_data)
+                    pairplot_data = pd.melt(
+                        ds_local, id_vars=['n_pokedex'], value_vars=colunas_pairplot)
+                    sns.boxplot(x='variable', y='value', data=pairplot_data)
                     plt.title("BoxPlot")
                     plt.xlabel("Colunas")
                     plt.ylabel("Valor")
@@ -350,6 +350,149 @@ def main():
                         str(i[0]) + " : " + str(i[1]) + \
                         "  =  " + str(i[2]) + "\n"
                 st.markdown(markdown_result_corr)
+    
+    elif selected_view == option3:
+        colunas_quantitativas = ['nome',
+                                 'vida',
+                                 'ataque',
+                                 'defesa',
+                                 'ataque_especial',
+                                 'defesa_especial',
+                                 'velocidade',
+                                 'altura',
+                                 'peso',
+                                 'taxa_de_femeas',
+                                 'xp_basico',
+                                 'taxa_de_captura',
+                                 'ciclo_de_ovo',
+                                 'felicidade_base',
+                                 'total_pokemons_do_mesmo_tipo',
+                                 'vulnerabilidade_normal',
+                                 'vulnerabilidade_fogo',
+                                 'vulnerabilidade_agua',
+                                 'vulnerabilidade_eletrico',
+                                 'vulnerabilidade_planta',
+                                 'vulnerabilidade_gelo',
+                                 'vulnerabilidade_lutador',
+                                 'vulnerabilidade_venenoso',
+                                 'vulnerabilidade_terrestre',
+                                 'vulnerabilidade_voador',
+                                 'vulnerabilidade_pisiquico',
+                                 'vulnerabilidade_inseto',
+                                 'vulnerabilidade_pedra',
+                                 'vulnerabilidade_fantasma',
+                                 'vulnerabilidade_dragao',
+                                 'vulnerabilidade_sombrio',
+                                 'vulnerabilidade_aco',
+                                 'vulnerabilidade_fada']
+        st.header(option3)
+        ds_ocorrencia = ds.copy()
+        st.dataframe(ds_ocorrencia)
+        st.write("Para analisar a dispersão de ocorrência dos dados será necessário aplicar o One Hot Encoding ao Dataset")
+        
+        def typeConversion(dataFrame):
+            unique_val = dataFrame["tipo"].unique()
+            
+            type_iterator = list()
+            for type in unique_val:
+                if not("~" in type):
+                    type_iterator.append(type)
+
+        
+            
+            for i in range(len(dataFrame)):
+                type_aux = type_iterator[:]
+                if '~' in dataFrame.loc[i,'tipo']:
+                    pokemon_types = dataFrame.loc[i,'tipo'].split('~')
+                    dataFrame.loc[i,pokemon_types[0]] = int(1)
+                    dataFrame.loc[i, pokemon_types[1]] = int(1)
+                    type_aux.pop(type_aux.index(pokemon_types[0]))
+                    type_aux.pop(type_aux.index(pokemon_types[1]))
+                    for j in type_aux:
+                        dataFrame.loc[i,j] = int(0)
+                else:
+                    mono_type = dataFrame.loc[i,'tipo']
+                    dataFrame.loc[i,mono_type] = int(1)
+                    type_aux.pop(type_aux.index(mono_type))
+                    for k  in type_aux:
+                        dataFrame.loc[i,k] = int(0)
+            
+            dataFrame.drop(['tipo'], axis=1, inplace=True)
+
+            return dataFrame
+
+
+        def colummConversion(dataFrame, col):
+            
+            unique_val = dataFrame[col].unique()
+
+            var_iterator = [itemlist for itemlist in unique_val]
+            for index in range(len(dataFrame)):
+                varIterator_aux = var_iterator[:]
+                current_val = dataFrame.loc[index,col]
+                dataFrame.loc[index, current_val] = 1 
+                varIterator_aux.pop(varIterator_aux.index(current_val))
+                for index_i in varIterator_aux:
+                    dataFrame.loc[index,index_i] = 0
+            
+            dataFrame.drop([col], axis=1, inplace=True)
+
+            return dataFrame
+        
+               
+        def convertBoleanValues(dataFrame):
+            dataFrame
+            boolcolumns = ['sem_genero', 'bebe_pokemon', 'lendario', 'mitico', 'padrao', 'forma_temporaria', 'evoluivel']
+
+            for i in range(len(boolcolumns)):
+                dataFrame[boolcolumns[i]] = dataFrame[boolcolumns[i]].astype(int)
+            
+            return dataFrame
+        
+
+        ds_ocorrencia = typeConversion(ds_ocorrencia)
+        ds_ocorrencia = colummConversion(ds_ocorrencia, 'genero')
+        ds_ocorrencia = colummConversion(ds_ocorrencia, 'forma')
+        ds_ocorrencia = colummConversion(ds_ocorrencia, 'cor_primaria')
+        ds_ocorrencia = convertBoleanValues(ds_ocorrencia)
+
+        ds_ocorrencia.drop(['habilidades','evoluivel'], axis= 1, inplace= True)
+
+        st.dataframe(ds_ocorrencia)
+
+
+        st.write("")
+        colunas_pairplot = st.multiselect(
+            'Selecione até 4 colunas para o Pairplot', colunas_quantitativas, key=1)
+        usar_dados_normalizados = st.checkbox('Usar dados normalizados')
+
+        if st.button('Gerar Pairplot'):
+            with st.expander("Resultados:"):
+                n_colunas = len(colunas_pairplot)
+                if n_colunas > 4 or n_colunas < 1:
+                    st.write("Selecione entre 1 e 4 colunas!")
+                else:
+                    plt.rcParams.update({'font.size': 6})
+                    plt.figure(figsize=(5, 5))
+                    ds_local = ds_ocorrencia.copy()
+     
+                    pairplot_data = pd.melt(
+                        ds_local, id_vars=['n_pokedex'], value_vars=colunas_pairplot)
+                    fig = px.scatter_matrix(ds_local, dimensions=colunas_pairplot)
+                    fig.update_traces(diagonal_visible = False)
+                    fig.update_layout(
+                        title='Dispersão',
+                    )
+                    plt.title("Pairplot")
+                    plt.xlabel("Colunas")
+                    plt.ylabel("Valor")
+                    st.plotly_chart(fig)
+
+        
+
+
+
+       
 
     # elif selected_view == option3:
 
