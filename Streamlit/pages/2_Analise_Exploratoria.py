@@ -13,26 +13,68 @@ from sklearn.metrics import silhouette_samples, silhouette_score
 
 
 def main():
-    option1 = "Análise Correlacional"
-    option2 = "Análise basica"
-    option3 = "Clusterização"
-    option4 = "Analisando os dados"
-
-    option_list = [option1, option2, option3, option4]
-
-    # Layout callouts
-    st.title("Análise Exploratória")
-    selected_option = st.selectbox('Selecione uma opção', option_list)
-    st.text("\n")
-    #
-    # Page persistent data
+    # Path para o dataset
+    path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.csv"
+    # Dataset completo
+    ds = pd.read_csv(path_to_dataset)
+    colunas = ['nome',
+               'n_pokedex',
+               'habilidades',
+               'tipo',
+               'vida',
+               'ataque',
+               'defesa',
+               'ataque_especial',
+               'defesa_especial',
+               'velocidade',
+               'altura',
+               'peso',
+               'genero',
+               'geracao',
+               'taxa_de_femeas',
+               'sem_genero',
+               'bebe_pokemon',
+               'lendario',
+               'mitico',
+               'padrao',
+               'forma_temporaria',
+               'xp_basico',
+               'taxa_de_captura',
+               'grupo_de_ovo',
+               'ciclo_de_ovo',
+               'felicidade_base',
+               'evoluivel',
+               'formas_evolucao',
+               'cor_primaria',
+               'forma',
+               'total_pokemons_do_mesmo_tipo',
+               'vulnerabilidade_normal',
+               'vulnerabilidade_fogo',
+               'vulnerabilidade_agua',
+               'vulnerabilidade_eletrico',
+               'vulnerabilidade_planta',
+               'vulnerabilidade_gelo',
+               'vulnerabilidade_lutador',
+               'vulnerabilidade_venenoso',
+               'vulnerabilidade_terrestre',
+               'vulnerabilidade_voador',
+               'vulnerabilidade_pisiquico',
+               'vulnerabilidade_inseto',
+               'vulnerabilidade_pedra',
+               'vulnerabilidade_fantasma',
+               'vulnerabilidade_dragao',
+               'vulnerabilidade_sombrio',
+               'vulnerabilidade_aco',
+               'vulnerabilidade_fada']
+    ds.columns = colunas
+    # Lista das Colunas de Status
     status = ['hp',
               'attack',
               'defense',
               'special_attack',
               'special_defense',
               'speed']
-
+    # Lista das Colunas de Vulnerabilidade
     effects = ['normal_attack_effectiveness',
                'fire_attack_effectiveness',
                'water_attack_effectiveness',
@@ -54,88 +96,263 @@ def main():
 
     skills = status+effects
 
-    path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.csv"
-    # Dataset completo
-    ds = pd.read_csv(path_to_dataset)
-    # Dataset apenas com as colunas de interesse
-    ds_relevant = ds[skills]
+    # Variaveis dos nomes das telas
+    # Tela que promove um resumo das colunas e dos dados
+    # Tela que exibe o pré-processamento
+    option1 = "Analisando os dados Categóricos nominais"
+    # Tela que exibe as analíses exploratorias feitas
+    option2 = "Analisando os dados Quantitativos e Categóricos Ordinais"
 
-    if selected_option == option4:
-        st.header("Analisando os dados")
-        st.write("Este topico promove uma análise dos dados do dataset")
-        st.write("Tendo em vista que no escopo do nosso projeto vamos trabalhar apenas no contexto de batalhas entre pokemons, vamos selecionar as colunas com atributos que são relevantes para tal contexto. Sendo estas:")
-        st.markdown("- Vida\n- Ataque\n- Defesa \n- Ataque Especial\n- Defesa Especial\n- Velocidade\n- Efetividade de ataques do tipo normais\n- Efetividade de ataques do tipo fogo\n- Efetividade de ataques do tipo água\n- Efetividade de ataques do tipo elétrico\n- Efetividade de ataques do tipo planta\n- Efetividade de ataques do tipo gelo\n- Efetividade de ataques do tipo lutador\n- Efetividade de ataques do tipo veneno\n- Efetividade de ataques do tipo terra\n- Efetividade de ataques do tipo voador\n- Efetividade de ataques do tipo psicico\n- Efetividade de ataques do tipo inseto\n- Efetividade de ataques do tipo pedra\n- Efetividade de ataques do tipo fantasma\n- Efetividade de ataques do tipo dragão\n- Efetividade de ataques do tipo sombra\n- Efetividade de ataques do tipo aço\n- Efetividade de ataques do tipo fada\n")
-        st.write('Os valores de efetividade são valores que multiplicam o dano que o pokemon vai receber dependendo do tipo que o atacou.')
-        st.write('Por exemplo: Considere um pokemon com efetividade de ataques do tipo pedra no valor 2.0. Este pokemon recebera o dobro de dano de um ataque de um pokemon tipo pedra.')
-        st.write(ds_relevant.describe())
-        with st.expander("insights"):
-            st.caption('A planilha exibe diversos valores relevantes. Nosso ponto de interesse esta nos valores minimos e maximos que indicam a amplitude destes atributos. Tendo em vista que o algoritmo de clusterização K-means faz uso de distancia euclidiana como valor para critério de agrupamento, valores com maior amplitude promoveram "maiores distancias" e portanto serão mais relevantes na clusterização. Para lidarmos com isso vamos normalizar todos atributos para que estes tenham a mesma amplitude e sejam, portanto, equivalentes no critério de agrupamento.')
+    option3 = "Parararara"
+    # Lista com nomes das telas
+    option_list = [option1, option2, option3]
 
-    elif selected_option==option2:
+    # Cabeçalho principal
+    st.title("Analise exploratoria")
+    selected_view = st.selectbox('Selecione uma opção', option_list)
+    st.text("\n")
 
-        
-        
-        st.write('\n')
+    if selected_view == option1:
+        colunas_categorias = ['nome',
+                              'habilidades',
+                              'tipo',
+                              'genero',
+                              'geracao',
+                              'sem_genero',
+                              'bebe_pokemon',
+                              'lendario',
+                              'mitico',
+                              'padrao',
+                              'forma_temporaria',
+                              'grupo_de_ovo',
+                              'evoluivel',
+                              'formas_evolucao',
+                              'cor_primaria',
+                              'forma']
 
+        markdown_categorias_string = ''
+        for coluna in colunas_categorias:
+            markdown_categorias_string += "- " + coluna + "\n"
+        st.header(option1)
+        st.write("Os dados categoricos do dataset são:")
+        st.markdown(markdown_categorias_string)
+        st.subheader("Verificando os atributos correlacionados")
+        st.write("Vamos verificar se um grupo de pokemons com um mesmo valor de uma coluna categorica sempre vão apresentar um valor unico em alguma outra coluna.")
+        select_coluna_1 = st.selectbox(
+            'Seleciona uma coluna', colunas_categorias)
+        coluna_valores_unicos = ds[select_coluna_1].unique()
+        select_valor_unico = st.selectbox(
+            'Selecione um dos valores unicos', coluna_valores_unicos, key=1)
+        with st.expander("Resultados:"):
+            loc = ds.loc[ds[select_coluna_1] == select_valor_unico]
+            lista_colunas_similares = []
+            lista_valor_similar = []
+            for coluna in loc.columns:
+                if coluna != select_coluna_1:
+                    unicos = loc[coluna].unique()
+                    if len(unicos) == 1:
+                        lista_colunas_similares.append(coluna)
+                        lista_valor_similar.append(unicos[0])
 
+            if len(lista_colunas_similares) > 0:
+                st.write("As colunas a seguir sempre apresentam o mesmo valor quando o valor da coluna: " +
+                         str(select_coluna_1) + " é " + str(select_valor_unico))
+                markdown_colunas_valores_similares = ''
+                for i in range(len(lista_colunas_similares)):
+                    markdown_colunas_valores_similares += "- " + \
+                        str(lista_colunas_similares[i]) + " : " + \
+                        str(lista_valor_similar[i]) + "\n"
+                st.markdown(markdown_colunas_valores_similares)
+            else:
+                st.write("Não existe nenhuma coluna que apresente sempre o mesmo valor quando a coluna: " +
+                         str(select_coluna_1) + " tem o valor: " + str(select_valor_unico))
 
-        st.subheader("Status por geração")
+            st.write("\n")
+            st.write("Dataframe de todas ocorrências que apresentam o valor: " +
+                     str(select_valor_unico)+" na coluna: " + str(select_coluna_1))
+            st.dataframe(loc)
 
-        
-        #st.pyplot(px.scatter(x=ds_type_iterator['sum'], y=ds_type_iterator['gen_introduced']))
-        
-    elif selected_option==option3:
-        st.header("Clusterização")
-        st.write("Este tópico promove uma análise de correlacional dos atributos com o objetivo de compreender como estes se correlacionam.")    
-        st.write(ds.describe())
+        st.write("\n")
 
+        st.write("Vamos verificar se todos os valores de uma coluna categorica apresentam uma ou mais colunas em comum que sempre terão um mesmo valor, dado o valor da coluna categórica sendo analisada.")
+        select_coluna_2 = st.selectbox(
+            'Seleciona uma coluna', colunas_categorias, key=2)
+        with st.expander("Resultados:"):
+            # Pegando todas as colunas com valores unicos dado o valor unico de uma coluna categorica
+            matriz_controle_colunas = []
+            lista_valores_unicos = ds[select_coluna_2].unique()
+            for valor_unico in lista_valores_unicos:
+                unico_ds = ds.loc[ds[select_coluna_2] == valor_unico]
+                lista_colunas_valores_unicos = []
+                for coluna in unico_ds.columns:
+                    if coluna != select_coluna_2:
+                        coluna_unique = unico_ds[coluna].unique()
+                        if len(coluna_unique) == 1:
+                            lista_colunas_valores_unicos.append(coluna)
+                matriz_controle_colunas.append(lista_colunas_valores_unicos)
 
-        ds_normalized = ds_relevant.copy()
+            # Verificando colunas presentes em todas ocorrências
+            colunas_sempre_presentes = []
+            matriz_valores_unicos_by_unique = []
+           # valores_associados_sempre_diferentes = True
 
-        for column in ds_normalized.columns:
-            ds_normalized[column] = (ds_normalized[column]-ds_normalized[column].min()) / (
-                ds_normalized[column].max()-ds_normalized[column].min())
+            if len(matriz_controle_colunas) > 1:
+                conjunto_referencia = matriz_controle_colunas[0]
+                for coluna in conjunto_referencia:
+                    coluna_bool = True
+                    for conjunto in matriz_controle_colunas:
+                        if conjunto.count(coluna) == 0:
+                            coluna_bool = False
+                    if coluna_bool == True:
+                        colunas_sempre_presentes.append(coluna)
 
-        st.write('A tabela normalizada determinou os valores maximos para 1 e minimos para 0, ajustando os valores nesse intervalo preservando suas proporções.')
-        st.write(ds_normalized.describe())
+            if len(colunas_sempre_presentes) > 0:
+                # for valor_unico in lista_valores_unicos:
+                #     unico_ds = ds.loc[ds[select_coluna_2] == valor_unico]
+                #     lista_valores_unicos = []
+                #     for coluna in colunas_sempre_presentes:
+                #         lista_valores_unicos.append(unico_ds[coluna].unique())
+                #     matriz_valores_unicos_by_unique.append(lista_valores_unicos)
 
-        ds_ajust = ds_normalized.copy()
-        for effect in effects:
-            ds_ajust[effect] = 1 - ds_ajust[effect]
+                # for i in range(len(matriz_valores_unicos_by_unique)):
+                #     for j in range(i+1,len(matriz_valores_unicos_by_unique)):
+                #         if matriz_valores_unicos_by_unique[i] == matriz_valores_unicos_by_unique[j]:
+                #             print(matriz_valores_unicos_by_unique[i])
+                #             print(matriz_valores_unicos_by_unique[j])
+                #             valores_associados_sempre_diferentes = False
+                st.write("Todas os valores unicos da coluna: " +
+                         select_coluna_2 + " tem um valor unico associado nas colunas:")
+                # if valores_associados_sempre_diferentes == True:
+                #     st.write("A combinação dos valores associados é unica para cada valor da coluna: "+ select_coluna_2)
+                markdown_colunas_sempre_presentes = ''
+                for coluna in colunas_sempre_presentes:
+                    markdown_colunas_sempre_presentes += "- " + coluna + "\n"
+                st.markdown(markdown_colunas_sempre_presentes)
+            else:
+                st.write(
+                    "Não existem valores associados aos valores unicos na coluna: " + select_coluna_2)
 
-        st.write(
-            'Outro problema é a maneira como esses atributos escalam. Todos os atributos de efetividade escalam inversamente em beneficio do pokemon, ou seja, quanto maior for a efetividade, pior para o pokemon. Vamos "negativar" esses valores para que expressem uma escala compativel com os outros atributos. Tendo em vista que a tabela esta normalizada(todos os valores no intervalor [0,1]), basta passar a função f(x) = 1-x para todos atributos de efetividade.')
-        st.write(ds_ajust.describe())
-        
-        plt.rcParams.update({'font.size': 3})
-        plt.figure(figsize=(5, 5))
-        sns.heatmap(ds_ajust[skills].corr(), cmap="Blues", annot=True)
-        st.pyplot(plt, clear_figure=True)
+    elif selected_view == option2:
+        colunas_quantitativas = ['vida',
+                                 'ataque',
+                                 'defesa',
+                                 'ataque_especial',
+                                 'defesa_especial',
+                                 'velocidade',
+                                 'altura',
+                                 'peso',
+                                 'taxa_de_femeas',
+                                 'xp_basico',
+                                 'taxa_de_captura',
+                                 'ciclo_de_ovo',
+                                 'felicidade_base',
+                                 'total_pokemons_do_mesmo_tipo',
+                                 'vulnerabilidade_normal',
+                                 'vulnerabilidade_fogo',
+                                 'vulnerabilidade_agua',
+                                 'vulnerabilidade_eletrico',
+                                 'vulnerabilidade_planta',
+                                 'vulnerabilidade_gelo',
+                                 'vulnerabilidade_lutador',
+                                 'vulnerabilidade_venenoso',
+                                 'vulnerabilidade_terrestre',
+                                 'vulnerabilidade_voador',
+                                 'vulnerabilidade_pisiquico',
+                                 'vulnerabilidade_inseto',
+                                 'vulnerabilidade_pedra',
+                                 'vulnerabilidade_fantasma',
+                                 'vulnerabilidade_dragao',
+                                 'vulnerabilidade_sombrio',
+                                 'vulnerabilidade_aco',
+                                 'vulnerabilidade_fada']
+        # st.dataframe(ds)
+        colunas_ordinais = ['geracao']
+        colunas_ordinais_quantitativas = colunas_ordinais + colunas_quantitativas
+        markdown_quantitativos_string = ''
+        markdown_ordinais_string = ''
+        for coluna in colunas_quantitativas:
+            markdown_quantitativos_string += "- " + coluna + "\n"
+        for coluna in colunas_ordinais:
+            markdown_ordinais_string += "- " + coluna + "\n"
+        st.header(option2)
+        st.write("Os dados quantitativos do dataset são:")
+        st.markdown(markdown_quantitativos_string)
+        st.write("Os dados ordinais do dataset são:")
+        st.markdown(markdown_ordinais_string)
+        st.subheader("Verificando os outliers")
+        st.write("É importante explicar que os outliers no contexto no contexto deste projeto devem ser interpretados como Pokemons que simplesmente estão acima da média e portanto não deve haver um tratamento para esses casos.")
+        colunas_boxplot = st.multiselect(
+            'Selecione até 4 colunas para o Boxplot', colunas_ordinais_quantitativas, key=1)
+        usar_dados_normalizados = st.checkbox('Usar dados normalizados')
+        if st.button('Gerar Boxplot'):
+            with st.expander("Resultados:"):
+                n_colunas = len(colunas_boxplot)
+                if n_colunas > 4 or n_colunas < 1:
+                    st.write("Selecione entre 1 e 4 colunas!")
+                else:
+                    plt.rcParams.update({'font.size': 6})
+                    plt.figure(figsize=(5, 5))
+                    ds_local = ds.copy()
+                    if usar_dados_normalizados:
+                        for coluna in colunas_boxplot:
+                            ds_local[coluna] = (ds[coluna]-ds[coluna].min()) / (
+                                ds[coluna].max()-ds[coluna].min())
 
-        wcss = []
-        wcss_range = range(2, 20)
-        for n in wcss_range:
-            cluster_builder = KMeans(n_clusters=n)
-            cluster_builder.fit(ds_ajust)
-            wcss.append(cluster_builder.inertia_)
+                    boxplot_data = pd.melt(
+                        ds_local, id_vars=['n_pokedex'], value_vars=colunas_boxplot)
+                    sns.boxplot(x='variable', y='value', data=boxplot_data)
+                    plt.title("BoxPlot")
+                    plt.xlabel("Colunas")
+                    plt.ylabel("Valor")
+                    st.pyplot(plt, clear_figure=True)
 
-        plt.plot(wcss_range, wcss, 'bx-')
-        plt.xlabel('Número de clusters')
-        plt.ylabel('Inercia')
-        plt.title('Metodo do cotuvelo usando a inércia')
-        st.pyplot(plt, clear_figure=True)
+        st.write("\n")
+        st.subheader("Verificando os coeficientes correlacionais")
+        st.write("Utilizando o heatmap:")
+        colunas_heatmap = st.multiselect(
+            'Selecione entre 5 e 10 colunas para o HeatMap', colunas_ordinais_quantitativas, key=2)
+        if st.button('Gerar HeatMap'):
+            with st.expander("Resultados:"):
+                n_colunas = len(colunas_heatmap)
+                if n_colunas > 10 or n_colunas < 5:
+                    st.write("Selecione entre 1 e 4 colunas!")
+                else:
+                    plt.rcParams.update({'font.size': 6})
+                    plt.figure(figsize=(5, 5))
+                    sns.heatmap(ds[colunas_heatmap].corr(),
+                                cmap="Blues", annot=True)
+                    st.pyplot(plt, clear_figure=True)
 
-        silh_scores = []
-        for n in wcss_range:
-            cluster_builder = KMeans(n_clusters=n)
-            preds = cluster_builder.fit_predict(ds_ajust)
-            silh_scores.append(silhouette_score(ds_ajust,preds))
-            
-        plt.plot(wcss_range, silh_scores, 'bx-')
-        plt.xlabel('Número de clusters')
-        plt.ylabel('Coeficiente de silhueta')
-        plt.title('Metodo da silhueta')
-        st.pyplot(plt, clear_figure=True)        
+        st.write("\n")
+        st.write("Filtrando dentro de uma amplitude:")
+        filter_range = st.slider(
+            'Selecione uma amplitude para filtragem', -1.0, 1.0, (-0.5, 0.5))
+        if st.button('Encontrar coeficientes'):
+            with st.expander("Resultados:"):
+                range_min = filter_range[0]
+                range_max = filter_range[1]
+                result_matrix = []
+                colunas_controler = colunas_ordinais_quantitativas.copy()
+                for coluna_ref in colunas_ordinais_quantitativas:
+                    colunas_controler.remove(coluna_ref)
+                    for coluna_comp in colunas_controler:
+                        coef_corr = ds[coluna_ref].corr(ds[coluna_comp])
+                        if coef_corr >= range_min and coef_corr <= range_max:
+                            result_matrix.append(
+                                [coluna_ref, coluna_comp, coef_corr])
+
+                def keyFunc(e):
+                    return e[2]
+                result_matrix.sort(reverse=True, key=keyFunc)
+                markdown_result_corr = ''
+                for i in result_matrix:
+                    markdown_result_corr += "- " + \
+                        str(i[0]) + " : " + str(i[1]) + \
+                        "  =  " + str(i[2]) + "\n"
+                st.markdown(markdown_result_corr)
+
+    # elif selected_view == option3:
+
 
 if __name__ == '__main__':
     main()
