@@ -1,4 +1,5 @@
 from sys import path
+from tkinter.tix import DirSelectBox
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -7,21 +8,33 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 import plotly.express as px
+# from pyspark.sql import SparkSession
+
+
 
 def main():
     path_to_dataset = os.path.join(os.getcwd(),os.pardir)+"/pokemon.csv"
     ds = pd.read_csv(path_to_dataset)
     st.title("Visualização de dados")
-        
+    
+
+    ds.to_parquet('pokemon.parquet')
+    dsParquet = pd.read_parquet('pokemon.parquet')
+
+    # spark = SparkSession.builder.appName("demoapp").getOrCreate()
+    # novo = spark.read.parquet('pokemon.parquet')
+
     st.write('\n')
 
     st.write("Esta seção será dedicada a visualização dos dados contidos no dataset.")
-    st.write('Abaixo encontra-se mm overview do dataset utilizado:')
+    st.write('Abaixo encontra-se um overview do dataset utilizado:')
     st.write('\n')
 
-    st.dataframe(ds)
+    st.dataframe(dsParquet)
+    
+
     st.write('\n')
-    st.dataframe(ds.describe())
+    st.dataframe(dsParquet.describe())
 
     st.write('\n')
     
