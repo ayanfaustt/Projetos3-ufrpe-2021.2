@@ -16,6 +16,56 @@ def main():
     ds = pd.read_parquet(path_to_dataset)
 
     listaColuna = ['name','hp', 'attack', 'defense']
+    colunas =['name',
+    'pokedex_number',
+    'abilities',
+    'typing',
+    'hp',
+    'attack',
+    'defense',
+    'special_attack',
+    'special_defense',
+    'speed',
+    'height',
+    'weight',
+    'genus',
+    'gen_introduced',
+    'female_rate',
+    'genderless',
+    'baby_pokemon',
+    'legendary',
+    'mythical',
+    'is_default',
+    'forms_switchable',
+    'base_experience',
+    'capture_rate',
+    'egg_groups',
+    'egg_cycles',
+    'base_happiness',
+    'can_evolve',
+    'evolves_from',
+    'primary_color',
+    'shape',
+    'number_pokemon_with_typing',
+    'normal_attack_effectiveness',
+    'fire_attack_effectiveness',
+    'water_attack_effectiveness',
+    'electric_attack_effectiveness',
+    'grass_attack_effectiveness',
+    'ice_attack_effectiveness',
+    'fighting_attack_effectiveness',
+    'poison_attack_effectiveness',
+    'ground_attack_effectiveness',
+    'fly_attack_effectiveness',
+    'psychic_attack_effectiveness',
+    'bug_attack_effectiveness',
+    'rock_attack_effectiveness',
+    'ghost_attack_effectiveness',
+    'dragon_attack_effectiveness',
+    'dark_attack_effectiveness',
+    'steel_attack_effectiveness',
+    'fairy_attack_effectiveness'
+    ]
 
     st.title("Visualização de dados")
     
@@ -28,9 +78,15 @@ def main():
 
     st.dataframe(ds[listaColuna])
     
+    colunasSelecionadas = st.multiselect(
+            'Selecione colunas para serem exibidas', colunas)
+
+    if st.button('Gerar tabela'):
+            with st.expander("Resultados:"):
+                st.dataframe(ds[colunasSelecionadas])
 
     st.write('\n')
-    st.dataframe(ds.describe())
+    st.dataframe(ds[listaColuna].describe())
 
     st.write('\n')
     
