@@ -14,9 +14,10 @@ from sklearn.metrics import silhouette_samples, silhouette_score
 
 def main():
     # Path para o dataset
-    path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.csv"
+    path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.parquet"
     # Dataset completo
-    ds = pd.read_csv(path_to_dataset)
+    ds = pd.read_parquet(path_to_dataset)
+
     colunas = ['nome',
                'n_pokedex',
                'habilidades',
@@ -208,7 +209,7 @@ def main():
 
             if len(colunas_sempre_presentes) > 0:
                 # for valor_unico in lista_valores_unicos:
-                #     unico_ds = ds.loc[ds[select_coluna_2] == valor_unico]
+                #     unico_ds = dsParquet.loc[dsParquet[select_coluna_2] == valor_unico]
                 #     lista_valores_unicos = []
                 #     for coluna in colunas_sempre_presentes:
                 #         lista_valores_unicos.append(unico_ds[coluna].unique())
@@ -265,7 +266,7 @@ def main():
                                  'vulnerabilidade_sombrio',
                                  'vulnerabilidade_aco',
                                  'vulnerabilidade_fada']
-        # st.dataframe(ds)
+        # st.dataframe(dsParquet)
         colunas_ordinais = ['geracao']
         colunas_ordinais_quantitativas = colunas_ordinais + colunas_quantitativas
         markdown_quantitativos_string = ''

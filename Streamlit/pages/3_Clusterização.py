@@ -61,9 +61,9 @@ def colummConversion(dataFrame, col):
 
 
 def main():
-    path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.csv"
+    path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.parquet"
     # Dataset completo
-    ds = pd.read_csv(path_to_dataset)
+    ds = pd.read_parquet(path_to_dataset)
     colunas = ['nome',
                'n_pokedex',
                'habilidades',

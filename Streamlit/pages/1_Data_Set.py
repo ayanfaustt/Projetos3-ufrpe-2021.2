@@ -8,21 +8,17 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 import plotly.express as px
-# from pyspark.sql import SparkSession
 
 
 
 def main():
-    path_to_dataset = os.path.join(os.getcwd(),os.pardir)+"/pokemon.csv"
-    ds = pd.read_csv(path_to_dataset)
+    path_to_dataset = os.path.join(os.getcwd(),os.pardir)+"/pokemon.parquet"
+    ds = pd.read_parquet(path_to_dataset)
+
+    listaColuna = ['name','hp', 'attack', 'defense']
+
     st.title("Visualização de dados")
     
-
-    ds.to_parquet('pokemon.parquet')
-    dsParquet = pd.read_parquet('pokemon.parquet')
-
-    # spark = SparkSession.builder.appName("demoapp").getOrCreate()
-    # novo = spark.read.parquet('pokemon.parquet')
 
     st.write('\n')
 
@@ -30,11 +26,11 @@ def main():
     st.write('Abaixo encontra-se um overview do dataset utilizado:')
     st.write('\n')
 
-    st.dataframe(dsParquet)
+    st.dataframe(ds[listaColuna])
     
 
     st.write('\n')
-    st.dataframe(dsParquet.describe())
+    st.dataframe(ds.describe())
 
     st.write('\n')
     
