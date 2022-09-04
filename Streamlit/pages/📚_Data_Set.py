@@ -80,7 +80,7 @@ def main():
     st.write('Abaixo encontra-se um overview do dataset utilizado:')
     st.write('\n')
 
-    st.dataframe(ds[listaColuna].loc[0:100])
+    st.dataframe(ds.iloc[0:25,0:13])
     
     st.markdown(
         """
@@ -155,15 +155,7 @@ def main():
     st.pyplot(plt,clear_figure=True)
     st.write('O gráfico acima exibe a distribuição de pokémons por geração')
 
-    st.write('\n')
-    grafico = px.scatter_matrix(ds, dimensions = ['attack','defense','hp','special_attack','special_defense'], color = 'hp')
-    grafico.update_traces(diagonal_visible = False)
-    grafico.update_layout(
-        title='Status de combate',
-        width=1000,
-        height=800,
-    )
-    st.plotly_chart(grafico)
+    st.write('O gráfico acima exibe a disbrituíção dos pokémons por geração')
     
     
 if __name__ == '__main__':
