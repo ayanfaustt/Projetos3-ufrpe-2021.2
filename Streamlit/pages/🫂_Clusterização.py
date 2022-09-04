@@ -11,6 +11,10 @@ import plotly.express as px
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_samples, silhouette_score
 
+st.set_page_config(
+    page_title="Clusterização",
+    page_icon="🫂",
+)
 
 def typeConversion(dataFrame):
     unique_val = dataFrame["tipo"].unique()
