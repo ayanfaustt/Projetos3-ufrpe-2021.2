@@ -18,58 +18,76 @@ def main():
     path_to_dataset = os.path.join(os.getcwd(),os.pardir)+"/pokemon.parquet"
     ds = pd.read_parquet(path_to_dataset)
 
-    listaColuna = ['name','pokedex_number', 'hp', 'typing', 'attack', 'defense', 'speed']
-    listaNulos = ['egg_cycles', 'base_happiness', 'can_evolve', 'evolves_from', 'primary_color']
-    colunas =['name',
-    'pokedex_number',
-    'abilities',
-    'typing',
-    'hp',
-    'attack',
-    'defense',
-    'special_attack',
-    'special_defense',
-    'speed',
-    'height',
-    'weight',
-    'genus',
-    'gen_introduced',
-    'female_rate',
-    'genderless',
-    'baby_pokemon',
-    'legendary',
-    'mythical',
-    'is_default',
-    'forms_switchable',
-    'base_experience',
-    'capture_rate',
-    'egg_groups',
-    'egg_cycles',
-    'base_happiness',
-    'can_evolve',
-    'evolves_from',
-    'primary_color',
-    'shape',
-    'number_pokemon_with_typing',
-    'normal_attack_effectiveness',
-    'fire_attack_effectiveness',
-    'water_attack_effectiveness',
-    'electric_attack_effectiveness',
-    'grass_attack_effectiveness',
-    'ice_attack_effectiveness',
-    'fighting_attack_effectiveness',
-    'poison_attack_effectiveness',
-    'ground_attack_effectiveness',
-    'fly_attack_effectiveness',
-    'psychic_attack_effectiveness',
-    'bug_attack_effectiveness',
-    'rock_attack_effectiveness',
-    'ghost_attack_effectiveness',
-    'dragon_attack_effectiveness',
-    'dark_attack_effectiveness',
-    'steel_attack_effectiveness',
-    'fairy_attack_effectiveness'
-    ]
+    listaColuna = ['nome','n_pokedex', 'vida', 'tipo', 'ataque', 'defesa', 'velocidade']
+    listaNulos = ['ciclo_de_ovo', 'felicidade_base', 'evoluivel', 'evolui_de', 'cor_primaria']
+    listaVulnerabilidades = ['vulnerabilidade_normal',
+        'vulnerabilidade_fogo',
+        'vulnerabilidade_agua',
+        'vulnerabilidade_eletrico',
+        'vulnerabilidade_planta',
+        'vulnerabilidade_gelo',
+        'vulnerabilidade_lutador',
+        'vulnerabilidade_venenoso',
+        'vulnerabilidade_terrestre',
+        'vulnerabilidade_voador',
+        'vulnerabilidade_pisiquico',
+        'vulnerabilidade_inseto',
+        'vulnerabilidade_pedra',
+        'vulnerabilidade_fantasma',
+        'vulnerabilidade_dragao',
+        'vulnerabilidade_sombrio',
+        'vulnerabilidade_aco',
+        'vulnerabilidade_fada']
+    colunas = ['nome',
+               'n_pokedex',
+               'habilidades',
+               'tipo',
+               'vida',
+               'ataque',
+               'defesa',
+               'ataque_especial',
+               'defesa_especial',
+               'velocidade',
+               'altura',
+               'peso',
+               'genero',
+               'geracao',
+               'taxa_de_femeas',
+               'sem_genero',
+               'bebe_pokemon',
+               'lendario',
+               'mitico',
+               'padrao',
+               'forma_temporaria',
+               'xp_basico',
+               'taxa_de_captura',
+               'grupo_de_ovo',
+               'ciclo_de_ovo',
+               'felicidade_base',
+               'evoluivel',
+               'evolui_de',
+               'cor_primaria',
+               'forma',
+               'total_pokemons_do_mesmo_tipo',
+               'vulnerabilidade_normal',
+               'vulnerabilidade_fogo',
+               'vulnerabilidade_agua',
+               'vulnerabilidade_eletrico',
+               'vulnerabilidade_planta',
+               'vulnerabilidade_gelo',
+               'vulnerabilidade_lutador',
+               'vulnerabilidade_venenoso',
+               'vulnerabilidade_terrestre',
+               'vulnerabilidade_voador',
+               'vulnerabilidade_pisiquico',
+               'vulnerabilidade_inseto',
+               'vulnerabilidade_pedra',
+               'vulnerabilidade_fantasma',
+               'vulnerabilidade_dragao',
+               'vulnerabilidade_sombrio',
+               'vulnerabilidade_aco',
+               'vulnerabilidade_fada']
+    ds.columns = colunas
 
     st.title("Visualização de dados")
     
@@ -80,11 +98,11 @@ def main():
     st.write('Abaixo encontra-se um overview do dataset utilizado:')
     st.write('\n')
 
-    st.dataframe(ds.iloc[0:25,0:13])
+    st.dataframe(ds.iloc[0:26,0:13])
     
     st.markdown(
         """
-        Selecionamos apenas as primeiras 100 linhas das 1017 do dataset original.
+        Selecionamos apenas as primeiras 25 linhas e 13 colunas do dataset original.
         As colunas escolhidas para essa exibição foram as que contém informações
         consideradas básicas sobre os pokemons.
 
@@ -121,17 +139,17 @@ def main():
     st.dataframe(ds[listaNulos].isnull().sum())
     st.markdown(
         """
-        A única coluna que apresenta registro nulos no dataset utilizado é a "evolves_from". Fato esse que ocorre porque nem todos os pokémons são evoluções de outro.
+        A única coluna que apresenta registro nulos no dataset utilizado é a "evolui_de". Fato esse que ocorre porque nem todos os pokémons são evoluções de outro.
         """
     )
     
     st.write('\n')
 
-    st.subheader('Exibição dos dados')
+    st.subheader('Exibição de alguns dados qualificativos')
     plt.figure(figsize= (20,10))
 
     sns.set(font_scale = 2)
-    sns.countplot(x = ds['can_evolve'])
+    sns.countplot(x = ds['evoluivel'])
     
     plt.xlabel('Evoluível')
     plt.ylabel('Quantidade')
@@ -140,7 +158,7 @@ def main():
     
     st.write('\n')
     
-    sns.countplot(x = ds['genderless'])
+    sns.countplot(x = ds['sem_genero'])
 
     plt.xlabel('Sem Gênero')
     plt.ylabel('Quantidade')
@@ -149,14 +167,35 @@ def main():
 
     st.write('\n')
 
-    plt.hist(x = ds['gen_introduced'])
+    plt.hist(x = ds['geracao'])
     plt.xlabel('Geração')
     plt.ylabel('Quantidade')
     st.pyplot(plt,clear_figure=True)
     st.write('O gráfico acima exibe a distribuição de pokémons por geração')
 
-    st.write('O gráfico acima exibe a disbrituíção dos pokémons por geração')
+    st.markdown(
+        """
+        ### Vulnerabilidade à ataques
+        Os gráficos abaixo servem para termos uma visualização dos tipos de pokémon que mais causam dano em ataques.
+        """
+    )
+
+    tipoSelecionado = st.multiselect(
+            'Selecione tipo para ser exibido', listaVulnerabilidades)
+    if st.button('Gerar'):
+            with st.expander("Resultados:"):
+                plt.hist(x = ds[tipoSelecionado])
+                plt.xlabel('Quantidade de dano recebido em ataque')
+                plt.ylabel('Quantidade de pokemons')
+                st.pyplot(plt,clear_figure=True)
+                st.write('O gráfico acima exibe a quantidade de pokémons vulneráveis ao ataque de pokémons do tipo selecionado')
     
+    st.markdown(
+        """
+        È possível observar que, apesar de balanceados, os tipos *fogo*, *grama*, *gelo*, *lutador*, *terra* e *pedra* são os que apresentam um maior indice
+        de pokemons que sofrem dano acima de 3,5.
+        """
+    )
     
 if __name__ == '__main__':
     main()

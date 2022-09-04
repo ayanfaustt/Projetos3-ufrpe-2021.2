@@ -49,7 +49,7 @@ def main():
                'ciclo_de_ovo',
                'felicidade_base',
                'evoluivel',
-               'formas_evolucao',
+               'evolui_de',
                'cor_primaria',
                'forma',
                'total_pokemons_do_mesmo_tipo',
