@@ -388,7 +388,7 @@ def main():
                                  'vulnerabilidade_fada']
         st.header(option3)
         ds_ocorrencia = ds.copy()
-        st.dataframe(ds_ocorrencia)
+        st.dataframe(ds_ocorrencia.iloc[0:25,0:13])
         st.write("Para analisar a dispersão de ocorrência dos dados será necessário aplicar o One Hot Encoding ao Dataset")
         
         def typeConversion(dataFrame):
@@ -442,7 +442,7 @@ def main():
         
                
         def convertBoleanValues(dataFrame):
-            dataFrame
+            #dataFrame
             boolcolumns = ['sem_genero', 'bebe_pokemon', 'lendario', 'mitico', 'padrao', 'forma_temporaria', 'evoluivel']
 
             for i in range(len(boolcolumns)):
@@ -459,7 +459,7 @@ def main():
 
         ds_ocorrencia.drop(['habilidades','evoluivel'], axis= 1, inplace= True)
 
-        st.dataframe(ds_ocorrencia)
+        st.dataframe(ds_ocorrencia.iloc[0:25])
 
 
         st.write("")
