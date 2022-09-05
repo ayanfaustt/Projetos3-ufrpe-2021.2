@@ -95,7 +95,7 @@ def main():
                'ciclo_de_ovo',
                'felicidade_base',
                'evoluivel',
-               'formas_evolucao',
+               'evolui_de',
                'cor_primaria',
                'forma',
                'total_pokemons_do_mesmo_tipo',
@@ -225,7 +225,7 @@ def main():
     st.write("Em nossos testes, não foi possível executar utilizando todas colunas devido ao tamanho do dataset e o tempo de execução para agrupar os dados após a transformação das colunas categóricas (one-hot-encoding).")
     st.write("Removemos as colunas categóricas com maior quantidade de valores unicos, assim como algumas colunas de identificadores unicos que não entram no escopo de agrupamento")
     with st.expander("Colunas removidas:"):
-        st.markdown("- nome\n- n_pokedex\n- habilidades\n- formas_evolucao")
+        st.markdown("- nome\n- n_pokedex\n- habilidades\n- evolui_de")
     st.write("\n")
     st.write("Para a clusterização, alem da transformação **one-hot-encoding** nas colunas categóricas nominais, foi aplicada a normalização dos valores quantitativos e categóricos ordinais.")
     ds_normalized = ds[colunas_quantitativas_ordinais+colunas_categorias_nominais+colunas_booleanas]

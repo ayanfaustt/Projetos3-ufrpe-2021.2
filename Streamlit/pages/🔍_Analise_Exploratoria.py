@@ -131,7 +131,7 @@ def main():
                               'forma_temporaria',
                               'grupo_de_ovo',
                               'evoluivel',
-                              'formas_evolucao',
+                              'evolui_de',
                               'cor_primaria',
                               'forma']
 
