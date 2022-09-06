@@ -16,6 +16,7 @@ st.set_page_config(
     page_icon="🔍",
 )
 
+
 def main():
     # Path para o dataset
     path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.parquet"
@@ -355,7 +356,7 @@ def main():
                         str(i[0]) + " : " + str(i[1]) + \
                         "  =  " + str(i[2]) + "\n"
                 st.markdown(markdown_result_corr)
-    
+
     elif selected_view == option3:
         colunas_quantitativas = ['nome',
                                  'vida',
@@ -392,68 +393,88 @@ def main():
                                  'vulnerabilidade_fada']
         st.header(option3)
         ds_ocorrencia = ds.copy()
-        st.dataframe(ds_ocorrencia.iloc[0:25,0:13])
-        st.write("Para analisar a dispersão de ocorrência dos dados será necessário aplicar o One Hot Encoding ao Dataset")
-        
+        # st.dataframe(ds_ocorrencia.iloc[0:25,0:13])
+        st.write(
+            "Para analisar a dispersão de ocorrência dos dados será necessário aplicar o One Hot Encoding ao Dataset")
+
         def typeConversion(dataFrame):
             unique_val = dataFrame["tipo"].unique()
-            
+
             type_iterator = list()
             for type in unique_val:
-                if not("~" in type):
+                if not ("~" in type):
                     type_iterator.append(type)
 
-        
-            
             for i in range(len(dataFrame)):
                 type_aux = type_iterator[:]
-                if '~' in dataFrame.loc[i,'tipo']:
-                    pokemon_types = dataFrame.loc[i,'tipo'].split('~')
-                    dataFrame.loc[i,pokemon_types[0]] = int(1)
+                if '~' in dataFrame.loc[i, 'tipo']:
+                    pokemon_types = dataFrame.loc[i, 'tipo'].split('~')
+                    dataFrame.loc[i, pokemon_types[0]] = int(1)
                     dataFrame.loc[i, pokemon_types[1]] = int(1)
                     type_aux.pop(type_aux.index(pokemon_types[0]))
                     type_aux.pop(type_aux.index(pokemon_types[1]))
                     for j in type_aux:
-                        dataFrame.loc[i,j] = int(0)
+                        dataFrame.loc[i, j] = int(0)
                 else:
-                    mono_type = dataFrame.loc[i,'tipo']
-                    dataFrame.loc[i,mono_type] = int(1)
+                    mono_type = dataFrame.loc[i, 'tipo']
+                    dataFrame.loc[i, mono_type] = int(1)
                     type_aux.pop(type_aux.index(mono_type))
-                    for k  in type_aux:
-                        dataFrame.loc[i,k] = int(0)
-            
+                    for k in type_aux:
+                        dataFrame.loc[i, k] = int(0)
+
             dataFrame.drop(['tipo'], axis=1, inplace=True)
 
             return dataFrame
 
+        # def colummConversion(dataFrame, col):
+
+        #     unique_val = dataFrame[col].unique()
+        #     teste = pd.DataFrame(columns= unique_val)
+
+        #     var_iterator = [itemlist for itemlist in unique_val]
+        #     for index in range(len(dataFrame)):
+        #         varIterator_aux = var_iterator[:]
+        #         current_val = dataFrame.loc[index,col]
+        #         dataFrame.loc[index, current_val] = 1
+        #         varIterator_aux.pop(varIterator_aux.index(current_val))
+        #         for index_i in varIterator_aux:
+        #             # print(dataFrame.loc[index,index_i]
+        #             dataFrame.loc[index,index_i] = 0
+
+        #     dataFrame.drop([col], axis=1, inplace=True)
+
+        #     return dataFrame
 
         def colummConversion(dataFrame, col):
-            
+
             unique_val = dataFrame[col].unique()
+            ds_aux = pd.DataFrame(columns=unique_val)
 
             var_iterator = [itemlist for itemlist in unique_val]
             for index in range(len(dataFrame)):
-                varIterator_aux = var_iterator[:]
-                current_val = dataFrame.loc[index,col]
-                dataFrame.loc[index, current_val] = 1 
-                varIterator_aux.pop(varIterator_aux.index(current_val))
-                for index_i in varIterator_aux:
-                    dataFrame.loc[index,index_i] = 0
+                dataAux = list()
+                current_val = dataFrame.loc[index, col]
+                for index_i in var_iterator:
+                  if current_val == index_i:
+                    dataAux.append(1)
+                  else:
+                    dataAux.append(0)
+                ds_aux.loc[index] = dataAux
             
-            dataFrame.drop([col], axis=1, inplace=True)
+            new_dataFrame = pd.concat([dataFrame, ds_aux], axis= 1)
+            new_dataFrame.drop([col], axis=1, inplace=True)
+            return new_dataFrame
 
-            return dataFrame
-        
-               
         def convertBoleanValues(dataFrame):
-            #dataFrame
-            boolcolumns = ['sem_genero', 'bebe_pokemon', 'lendario', 'mitico', 'padrao', 'forma_temporaria', 'evoluivel']
+            # dataFrame
+            boolcolumns = ['sem_genero', 'bebe_pokemon', 'lendario',
+                           'mitico', 'padrao', 'forma_temporaria', 'evoluivel']
 
             for i in range(len(boolcolumns)):
-                dataFrame[boolcolumns[i]] = dataFrame[boolcolumns[i]].astype(int)
-            
+                dataFrame[boolcolumns[i]
+                          ] = dataFrame[boolcolumns[i]].astype(int)
+
             return dataFrame
-        
 
         ds_ocorrencia = typeConversion(ds_ocorrencia)
         ds_ocorrencia = colummConversion(ds_ocorrencia, 'genero')
@@ -461,10 +482,9 @@ def main():
         ds_ocorrencia = colummConversion(ds_ocorrencia, 'cor_primaria')
         ds_ocorrencia = convertBoleanValues(ds_ocorrencia)
 
-        ds_ocorrencia.drop(['habilidades','evoluivel'], axis= 1, inplace= True)
+        ds_ocorrencia.drop(['habilidades', 'evoluivel'], axis=1, inplace=True)
 
         st.dataframe(ds_ocorrencia.iloc[0:25])
-
 
         st.write("")
         colunas_pairplot = st.multiselect(
@@ -480,11 +500,12 @@ def main():
                     plt.rcParams.update({'font.size': 6})
                     plt.figure(figsize=(5, 5))
                     ds_local = ds_ocorrencia.copy()
-     
+
                     pairplot_data = pd.melt(
                         ds_local, id_vars=['n_pokedex'], value_vars=colunas_pairplot)
-                    fig = px.scatter_matrix(ds_local, dimensions=colunas_pairplot)
-                    fig.update_traces(diagonal_visible = False)
+                    fig = px.scatter_matrix(
+                        ds_local, dimensions=colunas_pairplot)
+                    fig.update_traces(diagonal_visible=False)
                     fig.update_layout(
                         title='Dispersão',
                     )
@@ -493,14 +514,6 @@ def main():
                     plt.ylabel("Valor")
                     st.plotly_chart(fig)
 
-        
-
-
-
-       
-
     # elif selected_view == option3:
-
-
 if __name__ == '__main__':
     main()
