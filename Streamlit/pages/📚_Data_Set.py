@@ -151,19 +151,60 @@ def main():
     sns.set(font_scale = 2)
     sns.countplot(x = ds['evoluivel'])
     
+    plt.title('Pokémons que apresentam evoluções')
     plt.xlabel('Evoluível')
     plt.ylabel('Quantidade')
     st.pyplot(plt, clear_figure=True)
     st.write('O gráfico acima exibe a quantidade de pokémons que possuem ou não uma evolução.')
     
     st.write('\n')
-    
-    sns.countplot(x = ds['sem_genero'])
 
-    plt.xlabel('Sem Gênero')
+    sns.countplot(x=ds['forma_temporaria'])
+    plt.title("Pokémons com formas temporárias")
+    plt.xlabel('Possui forma temporária')
     plt.ylabel('Quantidade')
     st.pyplot(plt, clear_figure=True)
-    st.write('O gráfico acima exibe a quantidade de pokémons que possuem ou não divisão de gênero')
+    st.write("""
+    O gráfico acima exibe a quantidade de pokémons que possuem formas temporárias (mega evoluções e Gigantamax).É possível observar
+    que a quantidade de pokémons que contém esta mecânica é consiravelmente menor, uma vez que esse artifício foi introduzido pela 
+    primeira vez na sexta geração dos jogos (mega evoluções) e surgiram novamente na oitava geração (Gigantamax).
+    Esta informação é útil porque a mecânica de formas temporárias pode contribuir para o fator surpresa ao elaborar um time.
+    """)
+
+
+    st.write('\n')
+
+    ds_lendario = ds[ds['lendario'] == True]
+    st.dataframe(ds_lendario)
+    
+    plt.hist(x = ds_lendario['geracao'])
+
+    plt.title("Quantidade de pokémons lendários por geração")
+    plt.xlabel('Geração')
+    plt.ylabel('Quantidade de Lendários')
+    st.pyplot(plt, clear_figure=True)
+    st.write("""
+        O gráfico acima exibe a quantidade de pokémons lendários e suas variações. Os pokémons lendários são pokémons raros com valores de status
+        acima da média caracterísca esta que é a causa dos poucos exemplares desses pokémons. Há uma grande variação entre a quantidade de pokémons
+        por geração e, devido ao fato de pokémon ser uma franquia de jogos muita extensa, a variação pode dar-se que questões criativas e de mercado.
+        Um dos objetivos dos jogos é completar a pokedex e ter noção da quantidade de lendarios existentes é de grande utilidade.
+    """)
+
+    st.write('\n')
+    
+    ds_mitico = ds[ds['mitico'] == True]
+
+    plt.hist(x = ds_mitico['geracao'])
+
+    plt.title("Quantidade de pokémons Míticos")
+    plt.xlabel('Mítico')
+    plt.ylabel('Quantidade')
+    st.pyplot(plt, clear_figure=True)
+    st.write("""
+        O gráfico acima exibe a quantidade de pokémons míticos. Pokémons míticos são pokemons extremamente raros que não podem ser capturados na 'in game' 
+        sendo possível pegá-los apenas em eventos específicos. Com este grupo de pokémons ocorre algo semelhante aos lendários quanto a sua distribuição
+        pelas gerações. 
+    """)
 
     st.write('\n')
 
@@ -171,7 +212,10 @@ def main():
     plt.xlabel('Geração')
     plt.ylabel('Quantidade')
     st.pyplot(plt,clear_figure=True)
-    st.write('O gráfico acima exibe a distribuição de pokémons por geração')
+    st.write("""
+        O gráfico acima exibe a quantidade de pokémons por geração. A primeira geração de pokémons apresenta a maior quantidade de pokémons sendo uma das
+        gerações mais populares da franquia.
+    """)
 
     st.markdown(
         """
