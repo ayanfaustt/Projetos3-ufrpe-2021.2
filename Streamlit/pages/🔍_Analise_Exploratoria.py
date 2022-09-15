@@ -19,11 +19,29 @@ st.set_page_config(
 
 
 def main():
-    # Path para o dataset
-    path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.parquet"
-    # Dataset completo
+    path_to_dataset = os.path.join(os.getcwd(),os.pardir)+"/pokemon.parquet"
     ds = pd.read_parquet(path_to_dataset)
 
+    listaColuna = ['nome','n_pokedex', 'vida', 'tipo', 'ataque', 'defesa', 'velocidade']
+    listaNulos = ['ciclo_de_ovo', 'felicidade_base', 'evoluivel', 'evolui_de', 'cor_primaria']
+    listaVulnerabilidades = ['vulnerabilidade_normal',
+        'vulnerabilidade_fogo',
+        'vulnerabilidade_agua',
+        'vulnerabilidade_eletrico',
+        'vulnerabilidade_planta',
+        'vulnerabilidade_gelo',
+        'vulnerabilidade_lutador',
+        'vulnerabilidade_venenoso',
+        'vulnerabilidade_terrestre',
+        'vulnerabilidade_voador',
+        'vulnerabilidade_pisiquico',
+        'vulnerabilidade_inseto',
+        'vulnerabilidade_pedra',
+        'vulnerabilidade_fantasma',
+        'vulnerabilidade_dragao',
+        'vulnerabilidade_sombrio',
+        'vulnerabilidade_aco',
+        'vulnerabilidade_fada']
     colunas = ['nome',
                'n_pokedex',
                'habilidades',
@@ -74,6 +92,161 @@ def main():
                'vulnerabilidade_aco',
                'vulnerabilidade_fada']
     ds.columns = colunas
+
+    st.title("Analise exploratória")   
+    st.markdown(
+        """
+        ## Visualização de dados
+        """
+    )
+
+    st.write("Esta seção será dedicada a visualização dos dados contidos no dataset.")
+    st.write('Abaixo encontra-se um overview do dataset utilizado:')
+    st.write('\n')
+
+    st.dataframe(ds.iloc[0:26,0:13])
+    
+    st.markdown(
+        """
+        Selecionamos apenas as primeiras 25 linhas e 13 colunas do dataset original.
+        As colunas escolhidas para essa exibição foram as que contém informações
+        consideradas básicas sobre os pokemons.
+
+        Para ver mais colunas do dataset, basta usar o botão abaixo!
+        """
+    )
+
+    colunasSelecionadas = st.multiselect(
+            'Selecione colunas para serem exibidas', colunas)
+
+    if st.button('Gerar tabela'):
+            with st.expander("Resultados:"):
+                st.dataframe(ds[colunasSelecionadas])
+
+    st.markdown(
+        """
+        ## Estatísticas descritivas
+        """
+    )
+
+    st.dataframe(ds[listaColuna].describe())
+
+    st.markdown(
+        """
+        Dados estatísticos do dataset utilizado
+        """
+    )
+
+    st.write('\n')
+    
+    st.header('Dados nulos')
+    st.write('Rodando o comando "ds.isnull().sum()", obtém-se uma contagem dos resgistros que contém valor nulo para cada coluna.')
+
+    st.dataframe(ds[listaNulos].isnull().sum())
+    st.markdown(
+        """
+        A única coluna que apresenta registro nulos no dataset utilizado é a "evolui_de". Fato esse que ocorre porque nem todos os pokémons são evoluções de outro.
+        """
+    )
+    
+    st.write('\n')
+
+    st.subheader('Exibição de alguns dados qualificativos')
+    plt.figure(figsize= (20,10))
+
+    sns.set(font_scale = 2)
+    sns.countplot(x = ds['evoluivel'])
+    
+    plt.title('Pokémons que apresentam evoluções')
+    plt.xlabel('Evoluível')
+    plt.ylabel('Quantidade')
+    st.pyplot(plt, clear_figure=True)
+    st.write('O gráfico acima exibe a quantidade de pokémons que possuem ou não uma evolução.')
+    
+    st.write('\n')
+
+    sns.countplot(x=ds['forma_temporaria'])
+    plt.title("Pokémons com formas temporárias")
+    plt.xlabel('Possui forma temporária')
+    plt.ylabel('Quantidade')
+    st.pyplot(plt, clear_figure=True)
+    st.write("""
+    O gráfico acima exibe a quantidade de pokémons que possuem formas temporárias (mega evoluções e Gigantamax).É possível observar
+    que a quantidade de pokémons que contém esta mecânica é consiravelmente menor, uma vez que esse artifício foi introduzido pela 
+    primeira vez na sexta geração dos jogos (mega evoluções) e surgiram novamente na oitava geração (Gigantamax).
+    Esta informação é útil porque a mecânica de formas temporárias pode contribuir para o fator surpresa ao elaborar um time.
+    """)
+
+
+    st.write('\n')
+
+    ds_lendario = ds[ds['lendario'] == True]
+    st.dataframe(ds_lendario)
+    
+    plt.hist(x = ds_lendario['geracao'])
+
+    plt.title("Quantidade de pokémons lendários por geração")
+    plt.xlabel('Geração')
+    plt.ylabel('Quantidade de Lendários')
+    st.pyplot(plt, clear_figure=True)
+    st.write("""
+        O gráfico acima exibe a quantidade de pokémons lendários e suas variações. Os pokémons lendários são pokémons raros com valores de status
+        acima da média caracterísca esta que é a causa dos poucos exemplares desses pokémons. Há uma grande variação entre a quantidade de pokémons
+        por geração e, devido ao fato de pokémon ser uma franquia de jogos muita extensa, a variação pode dar-se que questões criativas e de mercado.
+        Um dos objetivos dos jogos é completar a pokedex e ter noção da quantidade de lendarios existentes é de grande utilidade.
+    """)
+
+    st.write('\n')
+    
+    ds_mitico = ds[ds['mitico'] == True]
+
+    plt.hist(x = ds_mitico['geracao'])
+
+    plt.title("Quantidade de pokémons Míticos")
+    plt.xlabel('Mítico')
+    plt.ylabel('Quantidade')
+    st.pyplot(plt, clear_figure=True)
+    st.write("""
+        O gráfico acima exibe a quantidade de pokémons míticos. Pokémons míticos são pokemons extremamente raros que não podem ser capturados na 'in game' 
+        sendo possível pegá-los apenas em eventos específicos. Com este grupo de pokémons ocorre algo semelhante aos lendários quanto a sua distribuição
+        pelas gerações. 
+    """)
+
+    st.write('\n')
+
+    plt.hist(x = ds['geracao'])
+    plt.xlabel('Geração')
+    plt.ylabel('Quantidade')
+    st.pyplot(plt,clear_figure=True)
+    st.write("""
+        O gráfico acima exibe a quantidade de pokémons por geração. A primeira geração de pokémons apresenta a maior quantidade de pokémons sendo uma das
+        gerações mais populares da franquia.
+    """)
+
+    st.markdown(
+        """
+        ### Vulnerabilidade à ataques
+        Os gráficos abaixo servem para termos uma visualização dos tipos de pokémon que mais causam dano em ataques.
+        """
+    )
+
+    tipoSelecionado = st.multiselect(
+            'Selecione tipo para ser exibido', listaVulnerabilidades)
+    if st.button('Gerar'):
+            with st.expander("Resultados:"):
+                plt.hist(x = ds[tipoSelecionado])
+                plt.xlabel('Quantidade de dano recebido em ataque')
+                plt.ylabel('Quantidade de pokemons')
+                st.pyplot(plt,clear_figure=True)
+                st.write('O gráfico acima exibe a quantidade de pokémons vulneráveis ao ataque de pokémons do tipo selecionado')
+    
+    st.markdown(
+        """
+        È possível observar que, apesar de balanceados, os tipos *fogo*, *grama*, *gelo*, *lutador*, *terra* e *pedra* são os que apresentam um maior indice
+        de pokemons que sofrem dano acima de 3,5.
+        """
+    )
+
     # Lista das Colunas de Status
     status = ['hp',
               'attack',
@@ -114,8 +287,13 @@ def main():
     # Lista com nomes das telas
     option_list = [option1, option2, option3]
 
-    # Cabeçalho principal
-    st.title("Analise exploratoria")
+    # Cabeçalho de analise dos dados
+    st.markdown(
+        """
+        ## Analise dos dados
+        """
+    )
+
     selected_view = st.selectbox('Selecione uma opção', option_list)
     st.text("\n")
 
@@ -140,7 +318,7 @@ def main():
         markdown_categorias_string = ''
         for coluna in colunas_categorias:
             markdown_categorias_string += "- " + coluna + "\n"
-        st.header(option1)
+        st.subheader(option1)
         st.write("Os dados categoricos do dataset são:")
         st.markdown(markdown_categorias_string)
         st.subheader("Verificando os atributos correlacionados")
@@ -281,7 +459,7 @@ def main():
             markdown_quantitativos_string += "- " + coluna + "\n"
         for coluna in colunas_ordinais:
             markdown_ordinais_string += "- " + coluna + "\n"
-        st.header(option2)
+        st.subheader(option2)
         st.write("Os dados quantitativos do dataset são:")
         st.markdown(markdown_quantitativos_string)
         st.write("Os dados ordinais do dataset são:")
@@ -394,7 +572,7 @@ def main():
                                  'vulnerabilidade_sombrio',
                                  'vulnerabilidade_aco',
                                  'vulnerabilidade_fada']
-        st.header(option3)
+        st.subheader(option3)
         ds_ocorrencia = ds.copy()
         # st.dataframe(ds_ocorrencia.iloc[0:25,0:13])
         st.write(
