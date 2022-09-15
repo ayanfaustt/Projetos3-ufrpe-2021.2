@@ -47,21 +47,22 @@ def typeConversion(dataFrame):
 
 
 def colummConversion(dataFrame, col):
-
     unique_val = dataFrame[col].unique()
-
+    ds_aux = pd.DataFrame(columns=unique_val)
     var_iterator = [itemlist for itemlist in unique_val]
     for index in range(len(dataFrame)):
-        varIterator_aux = var_iterator[:]
+        dataAux = list()
         current_val = dataFrame.loc[index, col]
-        dataFrame.loc[index, current_val] = 1
-        varIterator_aux.pop(varIterator_aux.index(current_val))
-        for index_i in varIterator_aux:
-            dataFrame.loc[index, index_i] = 0
-
-    dataFrame.drop([col], axis=1, inplace=True)
-
-    return dataFrame
+        for index_i in var_iterator:
+          if current_val == index_i:
+            dataAux.append(1)
+          else:
+            dataAux.append(0)
+        ds_aux.loc[index] = dataAux
+    
+    new_dataFrame = pd.concat([dataFrame, ds_aux], axis= 1)
+    new_dataFrame.drop([col], axis=1, inplace=True)
+    return new_dataFrame
 
 
 def main():

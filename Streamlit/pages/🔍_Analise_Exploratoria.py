@@ -1,5 +1,6 @@
 from copyreg import constructor
 from locale import normalize
+from logging.handlers import RotatingFileHandler
 from re import A
 import streamlit as st
 import pandas as pd
@@ -297,7 +298,9 @@ def main():
                     st.write("Selecione entre 1 e 4 colunas!")
                 else:
                     plt.rcParams.update({'font.size': 6})
-                    plt.figure(figsize=(5, 5))
+                    plt.figure(figsize=(6, 6))
+                    plt.xticks(rotation = 90)
+
                     ds_local = ds.copy()
                     if usar_dados_normalizados:
                         for coluna in colunas_pairplot:
