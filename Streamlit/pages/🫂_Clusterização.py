@@ -46,24 +46,40 @@ def typeConversion(dataFrame):
     return dataFrame
 
 
-def colummConversion(dataFrame, col):
-    unique_val = dataFrame[col].unique()
-    ds_aux = pd.DataFrame(columns=unique_val)
-    var_iterator = [itemlist for itemlist in unique_val]
-    for index in range(len(dataFrame)):
-        dataAux = list()
-        current_val = dataFrame.loc[index, col]
-        for index_i in var_iterator:
-          if current_val == index_i:
-            dataAux.append(1)
-          else:
-            dataAux.append(0)
-        ds_aux.loc[index] = dataAux
+# def colummConversion(dataFrame, col):
+#     unique_val = dataFrame[col].unique()
+#     ds_aux = pd.DataFrame(columns=unique_val)
+#     var_iterator = [itemlist for itemlist in unique_val]
+#     for index in range(len(dataFrame)):
+#         dataAux = list()
+#         current_val = dataFrame.loc[index, col]
+#         for index_i in var_iterator:
+#           if current_val == index_i:
+#             dataAux.append(1)
+#           else:
+#             dataAux.append(0)
+#         ds_aux.loc[index] = dataAux
     
-    new_dataFrame = pd.concat([dataFrame, ds_aux], axis= 1)
-    new_dataFrame.drop([col], axis=1, inplace=True)
-    return new_dataFrame
+#     new_dataFrame = pd.concat([dataFrame, ds_aux], axis= 1)
+#     new_dataFrame.drop([col], axis=1, inplace=True)
+#     return new_dataFrame
 
+def colummConversion(dataFrame, col):
+            
+            unique_val = dataFrame[col].unique()
+
+            var_iterator = [itemlist for itemlist in unique_val]
+            for index in range(len(dataFrame)):
+                varIterator_aux = var_iterator[:]
+                current_val = dataFrame.loc[index,col]
+                dataFrame.loc[index, current_val] = 1 
+                varIterator_aux.pop(varIterator_aux.index(current_val))
+                for index_i in varIterator_aux:
+                    dataFrame.loc[index,index_i] = 0
+            
+            dataFrame.drop([col], axis=1, inplace=True)
+
+            return dataFrame
 
 def main():
     path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.parquet"
@@ -236,10 +252,16 @@ def main():
     ds_normalized = typeConversion(ds_normalized)
     colunas_categodicas_but_tipo = colunas_categorias_nominais.copy()
     colunas_categodicas_but_tipo.remove("tipo")
+
+    # ds_normalized = colummConversion(ds_normalized, 'forma')
+    # st.dataframe(ds_normalized)
+
     for coluna in colunas_categodicas_but_tipo:
-        ds_normalized = colummConversion(ds_normalized,coluna)
+        print(coluna)
+        ds_normalized = colummConversion(ds_normalized,coluna) 
     for coluna in colunas_booleanas:
         ds_normalized[coluna] = ds_normalized[coluna].astype(int)
+
     st.write("Resumo do dataset após a normalização dos valores:")
     with st.expander("dataset formatado:"):
         st.dataframe(ds_normalized.describe())
