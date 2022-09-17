@@ -477,7 +477,6 @@ def main():
                 else:
                     plt.rcParams.update({'font.size': 6})
                     plt.figure(figsize=(6, 6))
-                    plt.xticks(rotation = 90)
 
                     ds_local = ds.copy()
                     if usar_dados_normalizados:
@@ -487,10 +486,10 @@ def main():
 
                     pairplot_data = pd.melt(
                         ds_local, id_vars=['n_pokedex'], value_vars=colunas_pairplot)
-                    sns.boxplot(x='variable', y='value', data=pairplot_data)
+                    sns.boxplot(x='value', y='variable', data=pairplot_data, color='skyblue')
                     plt.title("BoxPlot")
-                    plt.xlabel("Colunas")
-                    plt.ylabel("Valor")
+                    plt.ylabel("Colunas")
+                    plt.xlabel("Valor")
                     st.pyplot(plt, clear_figure=True)
 
         st.write("\n")
