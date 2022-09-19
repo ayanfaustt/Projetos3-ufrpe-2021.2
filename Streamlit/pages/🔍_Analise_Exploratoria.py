@@ -155,7 +155,8 @@ def main():
     plt.figure(figsize= (20,10))
 
     sns.set(font_scale = 2)
-    sns.countplot(x = ds['evoluivel'])
+    sns.countplot(x = ds['evoluivel'],  palette=["#0B50E3","#0075FA"])
+    # sns.countplot(x = ds['evoluivel'],  color = 'b')
     
     plt.title('Pokémons que apresentam evoluções')
     plt.xlabel('Evoluível')
@@ -165,7 +166,7 @@ def main():
     
     st.write('\n')
 
-    sns.countplot(x=ds['forma_temporaria'])
+    sns.countplot(x=ds['forma_temporaria'], palette=["#0B50E3","#0075FA"])
     plt.title("Pokémons com formas temporárias")
     plt.xlabel('Possui forma temporária')
     plt.ylabel('Quantidade')
@@ -183,7 +184,7 @@ def main():
     ds_lendario = ds[ds['lendario'] == True]
     st.dataframe(ds_lendario)
     
-    plt.hist(x = ds_lendario['geracao'])
+    plt.hist(x = ds_lendario['geracao'], color = "#0B50E3")
 
     plt.title("Quantidade de pokémons lendários por geração")
     plt.xlabel('Geração')
@@ -200,7 +201,7 @@ def main():
     
     ds_mitico = ds[ds['mitico'] == True]
 
-    plt.hist(x = ds_mitico['geracao'])
+    plt.hist(x = ds_mitico['geracao'], color = "#0B50E3")
 
     plt.title("Quantidade de pokémons Míticos")
     plt.xlabel('Mítico')
@@ -214,7 +215,7 @@ def main():
 
     st.write('\n')
 
-    plt.hist(x = ds['geracao'])
+    plt.hist(x = ds['geracao'], color = "#0B50E3")
     plt.xlabel('Geração')
     plt.ylabel('Quantidade')
     st.pyplot(plt,clear_figure=True)
@@ -234,7 +235,8 @@ def main():
             'Selecione tipo para ser exibido', listaVulnerabilidades)
     if st.button('Gerar'):
             with st.expander("Resultados:"):
-                plt.hist(x = ds[tipoSelecionado])
+                # plt.hist(x = ds[tipoSelecionado])
+                plt.hist(x = ds[tipoSelecionado], color = ['#002AFA',"#0B50E3","#0075FA", "#058FE6", "#00C3FF"]) # funciona apenas com 5 gráficos
                 plt.xlabel('Quantidade de dano recebido em ataque')
                 plt.ylabel('Quantidade de pokemons')
                 st.pyplot(plt,clear_figure=True)
