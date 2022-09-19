@@ -239,6 +239,7 @@ def main():
                 plt.hist(x = ds[tipoSelecionado], color = ['#002AFA',"#0B50E3","#0075FA", "#058FE6", "#00C3FF"]) # funciona apenas com 5 gráficos
                 plt.xlabel('Quantidade de dano recebido em ataque')
                 plt.ylabel('Quantidade de pokemons')
+                plt.legend(ds[tipoSelecionado])
                 st.pyplot(plt,clear_figure=True)
                 st.write('O gráfico acima exibe a quantidade de pokémons vulneráveis ao ataque de pokémons do tipo selecionado')
     
