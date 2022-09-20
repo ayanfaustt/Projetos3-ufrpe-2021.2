@@ -359,6 +359,13 @@ def main():
                         str(lista_colunas_similares[i]) + " : " + \
                         str(lista_valor_similar[i]) + "\n"
                 st.markdown(markdown_colunas_valores_similares)
+                plt.figure(figsize=(15, 15))
+                plt.barh(lista_colunas_similares[-19:], lista_valor_similar[-19:])
+                plt.title(select_valor_unico)
+                plt.ylabel('Colunas')
+                plt.xlabel('Valores')
+                st.pyplot(plt,clear_figure=True)
+                
             else:
                 st.write("Não existe nenhuma coluna que apresente sempre o mesmo valor quando a coluna: " +
                          str(select_coluna_1) + " tem o valor: " + str(select_valor_unico))
@@ -517,7 +524,6 @@ def main():
                     corr = ds[colunas_heatmap].corr()
                     mask = np.triu(corr)
                     np.fill_diagonal(mask, False)
-
                     plt.rcParams.update({'font.size': 10})
                     plt.figure(figsize=(5, 5))
                     sns.heatmap(corr,
