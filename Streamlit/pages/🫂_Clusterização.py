@@ -258,7 +258,7 @@ def main():
                                       'vulnerabilidade_aco',
                                       'vulnerabilidade_fada',
                                       'geracao']
-    colunas_categorias_nominais = [
+    colunas_categorias_nominais = ['habilidades',
                                    'genero',
                                    'grupo_de_ovo',
                                    'cor_primaria',
