@@ -322,7 +322,7 @@ def main():
 
     silh_scores = []
     for n in wcss_range:
-        cluster_builder = KMeans(n_clusters=n)
+        cluster_builder = KMeans(n_clusters=n, init='k-means++', random_state=10)
         preds = cluster_builder.fit_predict(ds_normalized)
         silh_scores.append(silhouette_score(ds_normalized, preds))
 
@@ -332,9 +332,7 @@ def main():
     plt.title('Metodo da silhueta')
     st.pyplot(plt, clear_figure=True)
 
-    ds_com_cluster = ds.copy()
-
-    kmeans_f = KMeans(n_clusters=15, init='k-means++', random_state=10)
+    kmeans_f = KMeans(n_clusters=12, init='k-means++', random_state=10)
     kmeans_f.fit(ds_normalized)
     ds_normalized['clusters'] = kmeans_f.labels_
     ds_com_cluster['clusters'] = kmeans_f.labels_
@@ -343,11 +341,44 @@ def main():
     # centroids = pd.DataFrame(scale.inverse_transform(kmeans_f.cluster_centers_))
     # centroids.columns = range_colunas
     # centroids['clusters'] = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
-
-    sns.pairplot(ds_com_cluster[['vida', 'ataque', 'defesa','ataque_especial','defesa_especial','velocidade', 'clusters']], hue = "clusters")
+    st.write('\n')
+    st.header('Informações sobre os clusters')
+    sns.set(font_scale = 2)
+    st.write("\n")
+    sns.pairplot(ds_com_cluster[['vida', 'ataque', 'defesa','ataque_especial','defesa_especial','velocidade', 'clusters']], hue="clusters" )
+    plt.title('Dispersão dos Status Básicos entre os clusters')
     st.pyplot(plt, clear_figure=True)
+    st.write("\n")
 
-    agrupado = ds_normalized.groupby(['clusters'])
+    sns.countplot(x=ds_com_cluster['clusters'], palette=["#0B50E3","#0075FA"])
+    plt.title('Quantidade de Pokémons por cluster')
+    plt.xlabel('Cluster')
+    plt.ylabel('Quantidade')
+    st.pyplot(plt, clear_figure=True)
+    st.write("""
+        O gŕafico acima exibe a quantidade de pokémons distribuídos em cada cluster. Observa-se 
+        que os clusters 1 e 6 possuem a maior quantidade de pokémons.
+    """)
+        
+    teste = pd.DataFrame(ds_com_cluster.groupby(['clusters']).agg({
+        'vida': 'median',
+        'ataque': 'median',
+        'defesa' : 'median',
+        'ataque_especial' : 'median',
+        'defesa_especial' : 'median',
+        'velocidade' : 'median',
+    }))
+    st.dataframe(teste)
+    st.write('\n')
+    st.write("""
+        Na tabela acima consta as médias dos atributos vida, ataque, defesa, ataque_especial, defesa_especial e velocidade.
+        De maneira geral, observa-se que os clusters apresentam valores semelhantes.
+        Porém há clusters que apresentam dados mais expressivos como o 3 que não apresenta nenhum atributo com média inferior a 90,
+        isso implica que, neste cluster, há pokémons lendários. O cluster 10 também apresenta dados significativos,
+        apesar de inferiores em relação aos primeiros. O cluster 2 apresenta as menores médias em quase todos os campos, indicando
+        que a maioria das suas ocorrências são pokémon de estágio 0.
+    """)
+
 
 if __name__ == '__main__':
     main()
