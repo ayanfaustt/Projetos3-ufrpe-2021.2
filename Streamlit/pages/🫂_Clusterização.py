@@ -10,6 +10,7 @@ import os
 import plotly.express as px
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_samples, silhouette_score
+from sklearn.preprocessing import StandardScaler
 
 st.set_page_config(
     page_title="Clusterização",
@@ -280,16 +281,17 @@ def main():
     st.write("Em nossos testes, não foi possível executar utilizando todas colunas devido ao tamanho do dataset e o tempo de execução para agrupar os dados após a transformação das colunas categóricas (one-hot-encoding).")
     st.write("Removemos as colunas categóricas com maior quantidade de valores unicos, assim como algumas colunas de identificadores unicos que não entram no escopo de agrupamento")
     with st.expander("Colunas removidas:"):
-        st.markdown("- nome\n- n_pokedex\n- habilidades\n- evolui_de")
+        st.markdown("- nome\n- n_pokedex\n- tipo\n- evolui_de")
     st.write("\n")
     st.write("Para a clusterização, alem da transformação **one-hot-encoding** nas colunas categóricas nominais, foi aplicada a normalização dos valores quantitativos e categóricos ordinais.")
     ds_normalized = ds[colunas_quantitativas_ordinais+colunas_categorias_nominais+colunas_booleanas]
+    ds_com_cluster = ds[colunas_quantitativas_ordinais+colunas_categorias_nominais+colunas_booleanas]
     for column in colunas_quantitativas_ordinais:
             ds_normalized[column] = (ds[column]-ds[column].min()) / (
                 ds[column].max()-ds[column].min())
     ds_normalized = typeConversion(ds_normalized)
     colunas_categodicas_but_tipo = colunas_categorias_nominais.copy()
-    colunas_categodicas_but_tipo.remove("tipo")
+    colunas_categodicas_but_tipo.remove("habilidades")
 
     # ds_normalized = colummConversion(ds_normalized, 'forma')
     # st.dataframe(ds_normalized)
@@ -304,10 +306,11 @@ def main():
     with st.expander("dataset formatado:"):
         st.dataframe(ds_normalized.describe())
     
+    scale = StandardScaler()
     wcss = []
     wcss_range = range(2, 25)
     for n in wcss_range:
-        cluster_builder = KMeans(n_clusters=n)
+        cluster_builder = KMeans(n_clusters=n, init='k-means++', random_state=10)
         cluster_builder.fit(ds_normalized)
         wcss.append(cluster_builder.inertia_)
 
@@ -329,15 +332,20 @@ def main():
     plt.title('Metodo da silhueta')
     st.pyplot(plt, clear_figure=True)
 
+    ds_com_cluster = ds.copy()
+
     kmeans_f = KMeans(n_clusters=15, init='k-means++', random_state=10)
     kmeans_f.fit(ds_normalized)
     ds_normalized['clusters'] = kmeans_f.labels_
+    ds_com_cluster['clusters'] = kmeans_f.labels_
 
-    centroids = pd.DataFrame(scale.inverse_transform(kmeans_f.cluster_centers_))
-    centroids.columns = range_colunas
-    centroids['clusters'] = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+    # range_colunas = ds_normalized.columns
+    # centroids = pd.DataFrame(scale.inverse_transform(kmeans_f.cluster_centers_))
+    # centroids.columns = range_colunas
+    # centroids['clusters'] = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
 
-    sns.pairplot(ds_normalized[['vida', 'ataque', 'defesa','ataque_especial','defesa_especial','velocidade', 'clusters']], hue = "clusters")
+    sns.pairplot(ds_com_cluster[['vida', 'ataque', 'defesa','ataque_especial','defesa_especial','velocidade', 'clusters']], hue = "clusters")
+    st.pyplot(plt, clear_figure=True)
 
     agrupado = ds_normalized.groupby(['clusters'])
 
