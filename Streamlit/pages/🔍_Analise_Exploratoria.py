@@ -503,7 +503,7 @@ def main():
         if st.button('Gerar HeatMap'):
             with st.expander("Resultados:"):
                 n_colunas = len(colunas_heatmap)
-                if n_colunas > 10 or n_colunas < 5:
+                if n_colunas > 30 or n_colunas < 5:
                     st.write("Selecione entre 5 e 10 colunas!")
                 else:
                     corr = ds[colunas_heatmap].corr()
@@ -511,7 +511,7 @@ def main():
                     np.fill_diagonal(mask, False)
 
                     plt.rcParams.update({'font.size': 10})
-                    plt.figure(figsize=(5, 5))
+                    plt.figure(figsize=(30, 30))
                     sns.heatmap(corr,
                                 cmap="Blues", annot=True, mask=mask)
                     st.pyplot(plt, clear_figure=True)

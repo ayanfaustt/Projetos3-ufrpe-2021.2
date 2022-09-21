@@ -16,34 +16,72 @@ st.set_page_config(
     page_icon="🫂",
 )
 
+# def typeConversion(dataFrame):
+#     unique_val = dataFrame["tipo"].unique()
+
+#     type_iterator = list()
+#     for type in unique_val:
+#         if not ("~" in type):
+#             type_iterator.append(type)
+
+#     for i in range(len(dataFrame)):
+#         type_aux = type_iterator[:]
+#         if '~' in dataFrame.loc[i, 'tipo']:
+#             pokemon_types = dataFrame.loc[i, 'tipo'].split('~')
+#             dataFrame.loc[i, pokemon_types[0]] = int(1)
+#             dataFrame.loc[i, pokemon_types[1]] = int(1)
+#             type_aux.pop(type_aux.index(pokemon_types[0]))
+#             type_aux.pop(type_aux.index(pokemon_types[1]))
+#             for j in type_aux:
+#                 dataFrame.loc[i, j] = int(0)
+#         else:
+#             mono_type = dataFrame.loc[i, 'tipo']
+#             dataFrame.loc[i, mono_type] = int(1)
+#             type_aux.pop(type_aux.index(mono_type))
+#             for k in type_aux:
+#                 dataFrame.loc[i, k] = int(0)
+
+#     dataFrame.drop(['tipo'], axis=1, inplace=True)
+
+#     return dataFrame
 def typeConversion(dataFrame):
-    unique_val = dataFrame["tipo"].unique()
+        unique_val = dataFrame["habilidades"].copy()
 
-    type_iterator = list()
-    for type in unique_val:
-        if not ("~" in type):
-            type_iterator.append(type)
+        type_iterator = list()
+        for type in unique_val:
+            habilidades = type.split('~')
+            for habilidade in habilidades:
+                if not( habilidade in type_iterator):
+                    type_iterator.append(habilidade)
 
-    for i in range(len(dataFrame)):
-        type_aux = type_iterator[:]
-        if '~' in dataFrame.loc[i, 'tipo']:
-            pokemon_types = dataFrame.loc[i, 'tipo'].split('~')
-            dataFrame.loc[i, pokemon_types[0]] = int(1)
-            dataFrame.loc[i, pokemon_types[1]] = int(1)
-            type_aux.pop(type_aux.index(pokemon_types[0]))
-            type_aux.pop(type_aux.index(pokemon_types[1]))
-            for j in type_aux:
-                dataFrame.loc[i, j] = int(0)
-        else:
-            mono_type = dataFrame.loc[i, 'tipo']
-            dataFrame.loc[i, mono_type] = int(1)
-            type_aux.pop(type_aux.index(mono_type))
-            for k in type_aux:
-                dataFrame.loc[i, k] = int(0)
+        for i in range(len(dataFrame)):
+            type_aux = type_iterator[:]
+            if '~' in dataFrame.loc[i, 'habilidades']:
+                pokemon_habilidades = dataFrame.loc[i, 'habilidades'].split('~')
+                if len(pokemon_habilidades) == 3:
+                    dataFrame.loc[i, pokemon_habilidades[0]] = int(1)
+                    dataFrame.loc[i, pokemon_habilidades[1]] = int(1)
+                    dataFrame.loc[i, pokemon_habilidades[2]] = int(1)
+                    type_aux.pop(type_aux.index(pokemon_habilidades[0]))
+                    type_aux.pop(type_aux.index(pokemon_habilidades[1]))
+                    type_aux.pop(type_aux.index(pokemon_habilidades[2]))
+                else:
+                    dataFrame.loc[i, pokemon_habilidades[0]] = int(1)
+                    dataFrame.loc[i, pokemon_habilidades[1]] = int(1)
+                    type_aux.pop(type_aux.index(pokemon_habilidades[0]))
+                    type_aux.pop(type_aux.index(pokemon_habilidades[1]))
+                for j in type_aux:
+                    dataFrame.loc[i, j] = int(0)
+            else:
+                mono_habilidade = dataFrame.loc[i, 'habilidades']
+                dataFrame.loc[i, mono_habilidade] = int(1)
+                type_aux.pop(type_aux.index(mono_habilidade))
+                for k in type_aux:
+                    dataFrame.loc[i, k] = int(0)
 
-    dataFrame.drop(['tipo'], axis=1, inplace=True)
+        dataFrame.drop(['habilidades'], axis=1, inplace=True)
 
-    return dataFrame
+        return dataFrame
 
 
 # def colummConversion(dataFrame, col):
@@ -220,7 +258,7 @@ def main():
                                       'vulnerabilidade_aco',
                                       'vulnerabilidade_fada',
                                       'geracao']
-    colunas_categorias_nominais = ['tipo',
+    colunas_categorias_nominais = [
                                    'genero',
                                    'grupo_de_ovo',
                                    'cor_primaria',
@@ -290,6 +328,18 @@ def main():
     plt.ylabel('Coeficiente de silhueta')
     plt.title('Metodo da silhueta')
     st.pyplot(plt, clear_figure=True)
+
+    kmeans_f = KMeans(n_clusters=15, init='k-means++', random_state=10)
+    kmeans_f.fit(ds_normalized)
+    ds_normalized['clusters'] = kmeans_f.labels_
+
+    centroids = pd.DataFrame(scale.inverse_transform(kmeans_f.cluster_centers_))
+    centroids.columns = range_colunas
+    centroids['clusters'] = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+
+    sns.pairplot(ds_normalized[['vida', 'ataque', 'defesa','ataque_especial','defesa_especial','velocidade', 'clusters']], hue = "clusters")
+
+    agrupado = ds_normalized.groupby(['clusters'])
 
 if __name__ == '__main__':
     main()
