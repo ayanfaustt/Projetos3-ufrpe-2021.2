@@ -24,19 +24,19 @@ def main():
 
     listaColuna = ['nome','n_pokedex', 'vida', 'tipo', 'ataque', 'defesa', 'velocidade']
     listaNulos = ['ciclo_de_ovo', 'felicidade_base', 'evoluivel', 'evolui_de', 'cor_primaria']
-    listaVulnerabilidades = ['vulnerabilidade_normal',
-        'vulnerabilidade_fogo',
-        'vulnerabilidade_agua',
-        'vulnerabilidade_eletrico',
+    listaVulnerabilidades = ['vulnerabilidade_fogo',
+        'vulnerabilidade_terrestre',
+        'vulnerabilidade_pedra',
         'vulnerabilidade_planta',
         'vulnerabilidade_gelo',
         'vulnerabilidade_lutador',
+        'vulnerabilidade_normal',
+        'vulnerabilidade_agua',
+        'vulnerabilidade_eletrico',
         'vulnerabilidade_venenoso',
-        'vulnerabilidade_terrestre',
         'vulnerabilidade_voador',
         'vulnerabilidade_pisiquico',
         'vulnerabilidade_inseto',
-        'vulnerabilidade_pedra',
         'vulnerabilidade_fantasma',
         'vulnerabilidade_dragao',
         'vulnerabilidade_sombrio',
@@ -227,28 +227,36 @@ def main():
     st.markdown(
         """
         ### Vulnerabilidade à ataques
-        Os gráficos abaixo servem para termos uma visualização dos tipos de pokémon que mais causam dano em ataques.
+        O gráfico abaixo apresenta as 5 colunas com maior quantidade de dano causado a pokémons.
         """
     )
 
+    listTopVulnerabilitys = [
+        'vulnerabilidade_fogo',
+        'vulnerabilidade_terrestre',
+        'vulnerabilidade_pedra',
+        'vulnerabilidade_planta',
+        'vulnerabilidade_gelo',
+        'vulnerabilidade_lutador'
+    ]
+
+    plt.hist(x = ds[listTopVulnerabilitys], color = ['#FF0000',"#FF6600","#FFFF00","#33FF33","#0000FF","#871F78"])
+    plt.xlabel('Dano recebido em ataque')
+    plt.ylabel('Pokemons')
+    plt.legend(ds[listTopVulnerabilitys])
+    st.pyplot(plt,clear_figure=True)
+    st.write('O gráfico acima exibe a quantidade de pokémons vulneráveis ao ataque de determinado tipo de pokémon.')
+
     tipoSelecionado = st.multiselect(
-            'Selecione tipo para ser exibido', listaVulnerabilidades)
+            'Selecione tipo(s) para visualizar gráfico de pokémons vulneráveis:', listaVulnerabilidades)
     if st.button('Gerar'):
             with st.expander("Resultados:"):
-                # plt.hist(x = ds[tipoSelecionado])
-                plt.hist(x = ds[tipoSelecionado], color = ['#002AFA',"#0B50E3","#0075FA", "#058FE6", "#00C3FF"]) # funciona apenas com 5 gráficos
-                plt.xlabel('Quantidade de dano recebido em ataque')
-                plt.ylabel('Quantidade de pokemons')
+                plt.hist(x = ds[tipoSelecionado])
+                plt.xlabel('Dano recebido em ataque')
+                plt.ylabel('Pokemons')
                 plt.legend(ds[tipoSelecionado])
                 st.pyplot(plt,clear_figure=True)
                 st.write('O gráfico acima exibe a quantidade de pokémons vulneráveis ao ataque de pokémons do tipo selecionado')
-    
-    st.markdown(
-        """
-        È possível observar que, apesar de balanceados, os tipos *fogo*, *grama*, *gelo*, *lutador*, *terra* e *pedra* são os que apresentam um maior indice
-        de pokemons que sofrem dano acima de 3,5.
-        """
-    )
 
     # Lista das Colunas de Status
     status = ['hp',
@@ -351,6 +359,13 @@ def main():
                         str(lista_colunas_similares[i]) + " : " + \
                         str(lista_valor_similar[i]) + "\n"
                 st.markdown(markdown_colunas_valores_similares)
+                plt.figure(figsize=(15, 15))
+                plt.barh(lista_colunas_similares[-19:], lista_valor_similar[-19:])
+                plt.title(select_valor_unico)
+                plt.ylabel('Colunas')
+                plt.xlabel('Valores')
+                st.pyplot(plt,clear_figure=True)
+                
             else:
                 st.write("Não existe nenhuma coluna que apresente sempre o mesmo valor quando a coluna: " +
                          str(select_coluna_1) + " tem o valor: " + str(select_valor_unico))
@@ -509,7 +524,6 @@ def main():
                     corr = ds[colunas_heatmap].corr()
                     mask = np.triu(corr)
                     np.fill_diagonal(mask, False)
-
                     plt.rcParams.update({'font.size': 10})
                     plt.figure(figsize=(30, 30))
                     sns.heatmap(corr,
