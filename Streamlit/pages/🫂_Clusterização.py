@@ -10,40 +10,79 @@ import os
 import plotly.express as px
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_samples, silhouette_score
+from sklearn.preprocessing import StandardScaler
 
 st.set_page_config(
     page_title="Clusterização",
     page_icon="🫂",
 )
 
+# def typeConversion(dataFrame):
+#     unique_val = dataFrame["tipo"].unique()
+
+#     type_iterator = list()
+#     for type in unique_val:
+#         if not ("~" in type):
+#             type_iterator.append(type)
+
+#     for i in range(len(dataFrame)):
+#         type_aux = type_iterator[:]
+#         if '~' in dataFrame.loc[i, 'tipo']:
+#             pokemon_types = dataFrame.loc[i, 'tipo'].split('~')
+#             dataFrame.loc[i, pokemon_types[0]] = int(1)
+#             dataFrame.loc[i, pokemon_types[1]] = int(1)
+#             type_aux.pop(type_aux.index(pokemon_types[0]))
+#             type_aux.pop(type_aux.index(pokemon_types[1]))
+#             for j in type_aux:
+#                 dataFrame.loc[i, j] = int(0)
+#         else:
+#             mono_type = dataFrame.loc[i, 'tipo']
+#             dataFrame.loc[i, mono_type] = int(1)
+#             type_aux.pop(type_aux.index(mono_type))
+#             for k in type_aux:
+#                 dataFrame.loc[i, k] = int(0)
+
+#     dataFrame.drop(['tipo'], axis=1, inplace=True)
+
+#     return dataFrame
 def typeConversion(dataFrame):
-    unique_val = dataFrame["tipo"].unique()
+        unique_val = dataFrame["habilidades"].copy()
 
-    type_iterator = list()
-    for type in unique_val:
-        if not ("~" in type):
-            type_iterator.append(type)
+        type_iterator = list()
+        for type in unique_val:
+            habilidades = type.split('~')
+            for habilidade in habilidades:
+                if not( habilidade in type_iterator):
+                    type_iterator.append(habilidade)
 
-    for i in range(len(dataFrame)):
-        type_aux = type_iterator[:]
-        if '~' in dataFrame.loc[i, 'tipo']:
-            pokemon_types = dataFrame.loc[i, 'tipo'].split('~')
-            dataFrame.loc[i, pokemon_types[0]] = int(1)
-            dataFrame.loc[i, pokemon_types[1]] = int(1)
-            type_aux.pop(type_aux.index(pokemon_types[0]))
-            type_aux.pop(type_aux.index(pokemon_types[1]))
-            for j in type_aux:
-                dataFrame.loc[i, j] = int(0)
-        else:
-            mono_type = dataFrame.loc[i, 'tipo']
-            dataFrame.loc[i, mono_type] = int(1)
-            type_aux.pop(type_aux.index(mono_type))
-            for k in type_aux:
-                dataFrame.loc[i, k] = int(0)
+        for i in range(len(dataFrame)):
+            type_aux = type_iterator[:]
+            if '~' in dataFrame.loc[i, 'habilidades']:
+                pokemon_habilidades = dataFrame.loc[i, 'habilidades'].split('~')
+                if len(pokemon_habilidades) == 3:
+                    dataFrame.loc[i, pokemon_habilidades[0]] = int(1)
+                    dataFrame.loc[i, pokemon_habilidades[1]] = int(1)
+                    dataFrame.loc[i, pokemon_habilidades[2]] = int(1)
+                    type_aux.pop(type_aux.index(pokemon_habilidades[0]))
+                    type_aux.pop(type_aux.index(pokemon_habilidades[1]))
+                    type_aux.pop(type_aux.index(pokemon_habilidades[2]))
+                else:
+                    dataFrame.loc[i, pokemon_habilidades[0]] = int(1)
+                    dataFrame.loc[i, pokemon_habilidades[1]] = int(1)
+                    type_aux.pop(type_aux.index(pokemon_habilidades[0]))
+                    type_aux.pop(type_aux.index(pokemon_habilidades[1]))
+                for j in type_aux:
+                    dataFrame.loc[i, j] = int(0)
+            else:
+                mono_habilidade = dataFrame.loc[i, 'habilidades']
+                dataFrame.loc[i, mono_habilidade] = int(1)
+                type_aux.pop(type_aux.index(mono_habilidade))
+                for k in type_aux:
+                    dataFrame.loc[i, k] = int(0)
 
-    dataFrame.drop(['tipo'], axis=1, inplace=True)
+        dataFrame.drop(['habilidades'], axis=1, inplace=True)
 
-    return dataFrame
+        return dataFrame
 
 
 # def colummConversion(dataFrame, col):
@@ -220,7 +259,7 @@ def main():
                                       'vulnerabilidade_aco',
                                       'vulnerabilidade_fada',
                                       'geracao']
-    colunas_categorias_nominais = ['tipo',
+    colunas_categorias_nominais = ['habilidades',
                                    'genero',
                                    'grupo_de_ovo',
                                    'cor_primaria',
@@ -242,16 +281,17 @@ def main():
     st.write("Em nossos testes, não foi possível executar utilizando todas colunas devido ao tamanho do dataset e o tempo de execução para agrupar os dados após a transformação das colunas categóricas (one-hot-encoding).")
     st.write("Removemos as colunas categóricas com maior quantidade de valores unicos, assim como algumas colunas de identificadores unicos que não entram no escopo de agrupamento")
     with st.expander("Colunas removidas:"):
-        st.markdown("- nome\n- n_pokedex\n- habilidades\n- evolui_de")
+        st.markdown("- nome\n- n_pokedex\n- tipo\n- evolui_de")
     st.write("\n")
     st.write("Para a clusterização, alem da transformação **one-hot-encoding** nas colunas categóricas nominais, foi aplicada a normalização dos valores quantitativos e categóricos ordinais.")
     ds_normalized = ds[colunas_quantitativas_ordinais+colunas_categorias_nominais+colunas_booleanas]
+    ds_com_cluster = ds[colunas_quantitativas_ordinais+colunas_categorias_nominais+colunas_booleanas]
     for column in colunas_quantitativas_ordinais:
             ds_normalized[column] = (ds[column]-ds[column].min()) / (
                 ds[column].max()-ds[column].min())
     ds_normalized = typeConversion(ds_normalized)
     colunas_categodicas_but_tipo = colunas_categorias_nominais.copy()
-    colunas_categodicas_but_tipo.remove("tipo")
+    colunas_categodicas_but_tipo.remove("habilidades")
 
     # ds_normalized = colummConversion(ds_normalized, 'forma')
     # st.dataframe(ds_normalized)
@@ -266,10 +306,11 @@ def main():
     with st.expander("dataset formatado:"):
         st.dataframe(ds_normalized.describe())
     
+    scale = StandardScaler()
     wcss = []
     wcss_range = range(2, 25)
     for n in wcss_range:
-        cluster_builder = KMeans(n_clusters=n)
+        cluster_builder = KMeans(n_clusters=n, init='k-means++', random_state=10)
         cluster_builder.fit(ds_normalized)
         wcss.append(cluster_builder.inertia_)
 
@@ -281,7 +322,7 @@ def main():
 
     silh_scores = []
     for n in wcss_range:
-        cluster_builder = KMeans(n_clusters=n)
+        cluster_builder = KMeans(n_clusters=n, init='k-means++', random_state=10)
         preds = cluster_builder.fit_predict(ds_normalized)
         silh_scores.append(silhouette_score(ds_normalized, preds))
 
@@ -290,6 +331,54 @@ def main():
     plt.ylabel('Coeficiente de silhueta')
     plt.title('Metodo da silhueta')
     st.pyplot(plt, clear_figure=True)
+
+    kmeans_f = KMeans(n_clusters=12, init='k-means++', random_state=10)
+    kmeans_f.fit(ds_normalized)
+    ds_normalized['clusters'] = kmeans_f.labels_
+    ds_com_cluster['clusters'] = kmeans_f.labels_
+
+    # range_colunas = ds_normalized.columns
+    # centroids = pd.DataFrame(scale.inverse_transform(kmeans_f.cluster_centers_))
+    # centroids.columns = range_colunas
+    # centroids['clusters'] = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+    st.write('\n')
+    st.header('Informações sobre os clusters')
+    sns.set(font_scale = 2)
+    st.write("\n")
+    sns.pairplot(ds_com_cluster[['vida', 'ataque', 'defesa','ataque_especial','defesa_especial','velocidade', 'clusters']], hue="clusters" )
+    plt.title('Dispersão dos Status Básicos entre os clusters')
+    st.pyplot(plt, clear_figure=True)
+    st.write("\n")
+
+    sns.countplot(x=ds_com_cluster['clusters'], palette=["#0B50E3","#0075FA"])
+    plt.title('Quantidade de Pokémons por cluster')
+    plt.xlabel('Cluster')
+    plt.ylabel('Quantidade')
+    st.pyplot(plt, clear_figure=True)
+    st.write("""
+        O gŕafico acima exibe a quantidade de pokémons distribuídos em cada cluster. Observa-se 
+        que os clusters 1 e 6 possuem a maior quantidade de pokémons.
+    """)
+        
+    teste = pd.DataFrame(ds_com_cluster.groupby(['clusters']).agg({
+        'vida': 'median',
+        'ataque': 'median',
+        'defesa' : 'median',
+        'ataque_especial' : 'median',
+        'defesa_especial' : 'median',
+        'velocidade' : 'median',
+    }))
+    st.dataframe(teste)
+    st.write('\n')
+    st.write("""
+        Na tabela acima consta as médias dos atributos vida, ataque, defesa, ataque_especial, defesa_especial e velocidade.
+        De maneira geral, observa-se que os clusters apresentam valores semelhantes.
+        Porém há clusters que apresentam dados mais expressivos como o 3 que não apresenta nenhum atributo com média inferior a 90,
+        isso implica que, neste cluster, há pokémons lendários. O cluster 10 também apresenta dados significativos,
+        apesar de inferiores em relação aos primeiros. O cluster 2 apresenta as menores médias em quase todos os campos, indicando
+        que a maioria das suas ocorrências são pokémon de estágio 0.
+    """)
+
 
 if __name__ == '__main__':
     main()
