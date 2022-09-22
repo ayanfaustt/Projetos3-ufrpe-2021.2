@@ -403,19 +403,8 @@ def main():
                         colunas_sempre_presentes.append(coluna)
 
             if len(colunas_sempre_presentes) > 0:
-                # for valor_unico in lista_valores_unicos:
-                #     unico_ds = dsParquet.loc[dsParquet[select_coluna_2] == valor_unico]
-                #     lista_valores_unicos = []
-                #     for coluna in colunas_sempre_presentes:
-                #         lista_valores_unicos.append(unico_ds[coluna].unique())
-                #     matriz_valores_unicos_by_unique.append(lista_valores_unicos)
 
-                # for i in range(len(matriz_valores_unicos_by_unique)):
-                #     for j in range(i+1,len(matriz_valores_unicos_by_unique)):
-                #         if matriz_valores_unicos_by_unique[i] == matriz_valores_unicos_by_unique[j]:
-                #             print(matriz_valores_unicos_by_unique[i])
-                #             print(matriz_valores_unicos_by_unique[j])
-                #             valores_associados_sempre_diferentes = False
+
                 st.write("Todas os valores unicos da coluna: " +
                          select_coluna_2 + " tem um valor unico associado nas colunas:")
                 # if valores_associados_sempre_diferentes == True:
