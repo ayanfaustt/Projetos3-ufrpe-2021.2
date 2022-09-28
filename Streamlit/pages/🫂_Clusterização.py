@@ -308,7 +308,7 @@ def main():
     
     scale = StandardScaler()
     wcss = []
-    wcss_range = range(2, 25)
+    wcss_range = range(2, 50)
     for n in wcss_range:
         cluster_builder = KMeans(n_clusters=n, init='k-means++', random_state=10)
         cluster_builder.fit(ds_normalized)
@@ -332,7 +332,7 @@ def main():
     plt.title('Metodo da silhueta')
     st.pyplot(plt, clear_figure=True)
 
-    kmeans_f = KMeans(n_clusters=12, init='k-means++', random_state=10)
+    kmeans_f = KMeans(n_clusters=15, init='k-means++', random_state=10)
     kmeans_f.fit(ds_normalized)
     ds_normalized['clusters'] = kmeans_f.labels_
     ds_com_cluster['clusters'] = kmeans_f.labels_
@@ -360,15 +360,15 @@ def main():
         que os clusters 1 e 6 possuem a maior quantidade de pokémons.
     """)
         
-    teste = pd.DataFrame(ds_com_cluster.groupby(['clusters']).agg({
-        'vida': 'median',
-        'ataque': 'median',
-        'defesa' : 'median',
-        'ataque_especial' : 'median',
-        'defesa_especial' : 'median',
-        'velocidade' : 'median',
+    cluster_mean = pd.DataFrame(ds_com_cluster.groupby(['clusters']).agg({
+        'vida': 'mean',
+        'ataque': 'mean',
+        'defesa' : 'mean',
+        'ataque_especial' : 'mean',
+        'defesa_especial' : 'mean',
+        'velocidade' : 'mean',
     }))
-    st.dataframe(teste)
+    st.dataframe(cluster_mean)
     st.write('\n')
     st.write("""
         Na tabela acima consta as médias dos atributos vida, ataque, defesa, ataque_especial, defesa_especial e velocidade.
