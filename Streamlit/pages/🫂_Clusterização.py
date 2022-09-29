@@ -1,11 +1,13 @@
 from copyreg import constructor
 from locale import normalize
 from re import A
+from click import style
 import streamlit as st
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import os
 import plotly.express as px
 from sklearn.cluster import KMeans
@@ -45,44 +47,46 @@ st.set_page_config(
 #     dataFrame.drop(['tipo'], axis=1, inplace=True)
 
 #     return dataFrame
+
+
 def typeConversion(dataFrame):
-        unique_val = dataFrame["habilidades"].copy()
+    unique_val = dataFrame["habilidades"].copy()
 
-        type_iterator = list()
-        for type in unique_val:
-            habilidades = type.split('~')
-            for habilidade in habilidades:
-                if not( habilidade in type_iterator):
-                    type_iterator.append(habilidade)
+    type_iterator = list()
+    for type in unique_val:
+        habilidades = type.split('~')
+        for habilidade in habilidades:
+            if not (habilidade in type_iterator):
+                type_iterator.append(habilidade)
 
-        for i in range(len(dataFrame)):
-            type_aux = type_iterator[:]
-            if '~' in dataFrame.loc[i, 'habilidades']:
-                pokemon_habilidades = dataFrame.loc[i, 'habilidades'].split('~')
-                if len(pokemon_habilidades) == 3:
-                    dataFrame.loc[i, pokemon_habilidades[0]] = int(1)
-                    dataFrame.loc[i, pokemon_habilidades[1]] = int(1)
-                    dataFrame.loc[i, pokemon_habilidades[2]] = int(1)
-                    type_aux.pop(type_aux.index(pokemon_habilidades[0]))
-                    type_aux.pop(type_aux.index(pokemon_habilidades[1]))
-                    type_aux.pop(type_aux.index(pokemon_habilidades[2]))
-                else:
-                    dataFrame.loc[i, pokemon_habilidades[0]] = int(1)
-                    dataFrame.loc[i, pokemon_habilidades[1]] = int(1)
-                    type_aux.pop(type_aux.index(pokemon_habilidades[0]))
-                    type_aux.pop(type_aux.index(pokemon_habilidades[1]))
-                for j in type_aux:
-                    dataFrame.loc[i, j] = int(0)
+    for i in range(len(dataFrame)):
+        type_aux = type_iterator[:]
+        if '~' in dataFrame.loc[i, 'habilidades']:
+            pokemon_habilidades = dataFrame.loc[i, 'habilidades'].split('~')
+            if len(pokemon_habilidades) == 3:
+                dataFrame.loc[i, pokemon_habilidades[0]] = int(1)
+                dataFrame.loc[i, pokemon_habilidades[1]] = int(1)
+                dataFrame.loc[i, pokemon_habilidades[2]] = int(1)
+                type_aux.pop(type_aux.index(pokemon_habilidades[0]))
+                type_aux.pop(type_aux.index(pokemon_habilidades[1]))
+                type_aux.pop(type_aux.index(pokemon_habilidades[2]))
             else:
-                mono_habilidade = dataFrame.loc[i, 'habilidades']
-                dataFrame.loc[i, mono_habilidade] = int(1)
-                type_aux.pop(type_aux.index(mono_habilidade))
-                for k in type_aux:
-                    dataFrame.loc[i, k] = int(0)
+                dataFrame.loc[i, pokemon_habilidades[0]] = int(1)
+                dataFrame.loc[i, pokemon_habilidades[1]] = int(1)
+                type_aux.pop(type_aux.index(pokemon_habilidades[0]))
+                type_aux.pop(type_aux.index(pokemon_habilidades[1]))
+            for j in type_aux:
+                dataFrame.loc[i, j] = int(0)
+        else:
+            mono_habilidade = dataFrame.loc[i, 'habilidades']
+            dataFrame.loc[i, mono_habilidade] = int(1)
+            type_aux.pop(type_aux.index(mono_habilidade))
+            for k in type_aux:
+                dataFrame.loc[i, k] = int(0)
 
-        dataFrame.drop(['habilidades'], axis=1, inplace=True)
+    dataFrame.drop(['habilidades'], axis=1, inplace=True)
 
-        return dataFrame
+    return dataFrame
 
 
 # def colummConversion(dataFrame, col):
@@ -98,27 +102,28 @@ def typeConversion(dataFrame):
 #           else:
 #             dataAux.append(0)
 #         ds_aux.loc[index] = dataAux
-    
+
 #     new_dataFrame = pd.concat([dataFrame, ds_aux], axis= 1)
 #     new_dataFrame.drop([col], axis=1, inplace=True)
 #     return new_dataFrame
 
 def colummConversion(dataFrame, col):
-            
-            unique_val = dataFrame[col].unique()
 
-            var_iterator = [itemlist for itemlist in unique_val]
-            for index in range(len(dataFrame)):
-                varIterator_aux = var_iterator[:]
-                current_val = dataFrame.loc[index,col]
-                dataFrame.loc[index, current_val] = 1 
-                varIterator_aux.pop(varIterator_aux.index(current_val))
-                for index_i in varIterator_aux:
-                    dataFrame.loc[index,index_i] = 0
-            
-            dataFrame.drop([col], axis=1, inplace=True)
+    unique_val = dataFrame[col].unique()
 
-            return dataFrame
+    var_iterator = [itemlist for itemlist in unique_val]
+    for index in range(len(dataFrame)):
+        varIterator_aux = var_iterator[:]
+        current_val = dataFrame.loc[index, col]
+        dataFrame.loc[index, current_val] = 1
+        varIterator_aux.pop(varIterator_aux.index(current_val))
+        for index_i in varIterator_aux:
+            dataFrame.loc[index, index_i] = 0
+
+    dataFrame.drop([col], axis=1, inplace=True)
+
+    return dataFrame
+
 
 def main():
     path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.parquet"
@@ -284,11 +289,13 @@ def main():
         st.markdown("- nome\n- n_pokedex\n- tipo\n- evolui_de")
     st.write("\n")
     st.write("Para a clusterização, alem da transformação **one-hot-encoding** nas colunas categóricas nominais, foi aplicada a normalização dos valores quantitativos e categóricos ordinais.")
-    ds_normalized = ds[colunas_quantitativas_ordinais+colunas_categorias_nominais+colunas_booleanas]
-    ds_com_cluster = ds[colunas_quantitativas_ordinais+colunas_categorias_nominais+colunas_booleanas]
+    ds_normalized = ds[colunas_quantitativas_ordinais +
+                       colunas_categorias_nominais+colunas_booleanas]
+    ds_com_cluster = ds[colunas_quantitativas_ordinais +
+                        colunas_categorias_nominais+colunas_booleanas]
     for column in colunas_quantitativas_ordinais:
-            ds_normalized[column] = (ds[column]-ds[column].min()) / (
-                ds[column].max()-ds[column].min())
+        ds_normalized[column] = (ds[column]-ds[column].min()) / (
+            ds[column].max()-ds[column].min())
     ds_normalized = typeConversion(ds_normalized)
     colunas_categodicas_but_tipo = colunas_categorias_nominais.copy()
     colunas_categodicas_but_tipo.remove("habilidades")
@@ -298,19 +305,20 @@ def main():
 
     for coluna in colunas_categodicas_but_tipo:
         print(coluna)
-        ds_normalized = colummConversion(ds_normalized,coluna) 
+        ds_normalized = colummConversion(ds_normalized, coluna)
     for coluna in colunas_booleanas:
         ds_normalized[coluna] = ds_normalized[coluna].astype(int)
 
     st.write("Resumo do dataset após a normalização dos valores:")
     with st.expander("dataset formatado:"):
         st.dataframe(ds_normalized.describe())
-    
+
     scale = StandardScaler()
     wcss = []
     wcss_range = range(2, 50)
     for n in wcss_range:
-        cluster_builder = KMeans(n_clusters=n, init='k-means++', random_state=10)
+        cluster_builder = KMeans(
+            n_clusters=n, init='k-means++', random_state=10)
         cluster_builder.fit(ds_normalized)
         wcss.append(cluster_builder.inertia_)
 
@@ -320,17 +328,53 @@ def main():
     plt.title('Metodo do cotovelo usando a inércia')
     st.pyplot(plt, clear_figure=True)
 
-    silh_scores = []
-    for n in wcss_range:
-        cluster_builder = KMeans(n_clusters=n, init='k-means++', random_state=10)
-        preds = cluster_builder.fit_predict(ds_normalized)
-        silh_scores.append(silhouette_score(ds_normalized, preds))
+    # silh_scores = []
+    # for n in wcss_range:
+    #     cluster_builder = KMeans(n_clusters=n, init='k-means++', random_state=10)
+    #     preds = cluster_builder.fit_predict(ds_normalized)
+    #     silh_scores.append(silhouette_score(ds_normalized, preds))
 
-    plt.plot(wcss_range, silh_scores, 'bx-')
-    plt.xlabel('Número de clusters')
-    plt.ylabel('Coeficiente de silhueta')
-    plt.title('Metodo da silhueta')
-    st.pyplot(plt, clear_figure=True)
+    # plt.plot(wcss_range, silh_scores, 'bx-')
+    # plt.xlabel('Número de clusters')
+    # plt.ylabel('Coeficiente de silhueta')
+    # plt.title('Metodo da silhueta')
+    # st.pyplot(plt, clear_figure=True)
+    range_n_clusters = [2,3,4,5,6,7,8,9]
+    for n in range_n_clusters:
+        plt.xlim((-0.1, 1))
+        plt.ylim([0, len(ds_normalized)+(n + 1)*10])
+        plt.figure(figsize=(15, 15))
+        clusterer = KMeans(n, init='k-means++', random_state=10)
+        cluster_labels = clusterer.fit_predict(ds_normalized)
+        silhouette_avg = silhouette_score(ds_normalized, cluster_labels)
+        st.write(silhouette_avg)
+
+        sample_silhouette_values = silhouette_samples(
+            ds_normalized, cluster_labels)
+
+        y_lower = 10
+        for i in range(n):
+            ith_cluster_silhouette_values = sample_silhouette_values[cluster_labels == i]
+            ith_cluster_silhouette_values.sort()
+            size_cluster_i = ith_cluster_silhouette_values.shape[0]
+            y_upper = y_lower + size_cluster_i
+
+            color = cm.nipy_spectral(float(i)/n)
+            plt.fill_betweenx(np.arange(y_lower, y_upper),
+                            0,
+                            ith_cluster_silhouette_values,
+                            color=color,
+                            alpha=0.7)
+            # /
+            plt.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
+            y_lower = y_upper + 10
+        plt.yticks([])
+        plt.title("Gráfico da silhueta para "+str(n)+" clusters")
+        plt.xlabel("Valores do coeficiente de silhueta")
+        plt.ylabel("Clusters")
+        plt.axvline(x=silhouette_avg, color='red', linestyle='--')
+        plt.savefig('fig'+str(n))
+    # st.pyplot(plt, clear_figure=True)
 
     kmeans_f = KMeans(n_clusters=15, init='k-means++', random_state=10)
     kmeans_f.fit(ds_normalized)
@@ -343,14 +387,15 @@ def main():
     # centroids['clusters'] = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
     st.write('\n')
     st.header('Informações sobre os clusters')
-    sns.set(font_scale = 2)
+    sns.set(font_scale=2)
     st.write("\n")
-    sns.pairplot(ds_com_cluster[['vida', 'ataque', 'defesa','ataque_especial','defesa_especial','velocidade', 'clusters']], hue="clusters" )
+    sns.pairplot(ds_com_cluster[['vida', 'ataque', 'defesa', 'ataque_especial',
+                 'defesa_especial', 'velocidade', 'clusters']], hue="clusters")
     plt.title('Dispersão dos Status Básicos entre os clusters')
     st.pyplot(plt, clear_figure=True)
     st.write("\n")
 
-    sns.countplot(x=ds_com_cluster['clusters'], palette=["#0B50E3","#0075FA"])
+    sns.countplot(x=ds_com_cluster['clusters'], palette=["#0B50E3", "#0075FA"])
     plt.title('Quantidade de Pokémons por cluster')
     plt.xlabel('Cluster')
     plt.ylabel('Quantidade')
@@ -359,14 +404,14 @@ def main():
         O gŕafico acima exibe a quantidade de pokémons distribuídos em cada cluster. Observa-se 
         que os clusters 1 e 6 possuem a maior quantidade de pokémons.
     """)
-        
+
     cluster_mean = pd.DataFrame(ds_com_cluster.groupby(['clusters']).agg({
         'vida': 'mean',
         'ataque': 'mean',
-        'defesa' : 'mean',
-        'ataque_especial' : 'mean',
-        'defesa_especial' : 'mean',
-        'velocidade' : 'mean',
+        'defesa': 'mean',
+        'ataque_especial': 'mean',
+        'defesa_especial': 'mean',
+        'velocidade': 'mean',
     }))
     st.dataframe(cluster_mean)
     st.write('\n')
