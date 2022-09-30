@@ -7,6 +7,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import roc_curve
+from sklearn.metrics import auc
+from itertools import cycle
 
 
 st.set_page_config(
@@ -171,6 +174,47 @@ def main():
 
     st.write(fig)
     st.write('\n')
+
+    st.write('\n')
+    st.markdown(
+        """
+        ### Curva ROC
+        """
+    )
+
+    st.markdown(
+        """
+        A Curva Característica de Operação do Receptor (Receiver Operating Characteristic Curve), ou, simplesmente, curva ROC é uma representação gráfica do desempenho do classificador.
+
+        A curva ROC bem como a matriz de confusão e suas métricas servem para ajudar a se aproximar do modelo ideal para aquele problema.
+        """
+    )
+
+    y_score = dtc.predict_proba(x)
+    y_test_roc = pd.get_dummies(y).values
+    n_classes = 2
+    lw = 2
+    # Calculando a curva ROC para cada classe
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+    for i in range(n_classes):
+        fpr[i], tpr[i], _ = roc_curve(y_test_roc[:,i], y_score[:,i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+    # Gerando a curva ROC para cada classe, com cores diferentes para cada classe
+    plt.figure()
+    colors = cycle(['darkorange', 'cornflowerblue'])
+    for i, color, classes in zip(range(n_classes), colors, dtc.classes_):
+        plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='{0} (area = {1:0.3f})'.format(classes, roc_auc[i]))
+    # Configurações de eixos, legenda e título
+    plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+    plt.xlim([-0.05, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('Especificidade', fontsize=20)
+    plt.ylabel('Sensibilidade', fontsize=20)
+    plt.title('Curva ROC Árvore de Decisão')
+    plt.legend(loc="lower right", fontsize=20) 
+    st.pyplot(plt, clear_figure=True)
 
 if __name__ == '__main__':
     main()
