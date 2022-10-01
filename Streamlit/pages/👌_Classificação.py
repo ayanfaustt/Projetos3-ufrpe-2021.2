@@ -108,22 +108,29 @@ def main():
     path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.parquet"
     ds = pd.read_parquet(path_to_dataset)
 
+
+    
     st.title("Classificação")   
+
+    st.write(
+            "Esse algoritmo foi utilizado para verificar se pokémons lendários podem ser comparados a pokemóns que são considerados como “comuns”, ou seja, se um pokémon “comum” pode ser comparado à um nível de poder de um pokémon lendário, sendo ele considerado um pseudo-lendário, ou se um pokémon lendário pode ter o mesmo nível de poder que um pokémon “comum”.")
+    
     st.markdown(
         """
-        ## Visualização de dados
+        ## Tratamento dos dados
         """
     )
 
     st.write('\n')
     st.write("As colunas categóricas nominais foram reajustadas utilizando **one-hot-encoding**, que transforma todos os valores unicos de uma coluna categórica em novas colunas com valor 1 ou 0.")
     st.write("Ocorrências que apresentavam o valor categórico terão o valor 1 na nova coluna e 0, caso não.")
-    st.write("Em nossos testes, não foi possível executar utilizando todas colunas devido ao tamanho do dataset e o tempo de execução para agrupar os dados após a transformação das colunas categóricas (one-hot-encoding).")
-    st.write("Removemos as colunas categóricas com maior quantidade de valores unicos, assim como algumas colunas de identificadores unicos que não entram no escopo de agrupamento")
+    # Refatorar linha abaixo
+    st.write("Foi adicionada uma coluna “ml” que soma a coluna de pokemóns legendários e míticos, pois, pokemóns míticos são considerados tipos de pokémons lendários.") 
+    st.write("Removemos as colunas categóricas com maior quantidade de valores unicos, assim como algumas colunas de identificadores unicos que não entram no escopo de agrupamento, além de colunas poderiam facilmente identifcar pokémons lendários através de seus dados.")
     # st.write(
     #         "Para realizar a classificação dos dados será necessário aplicar o One Hot Encoding ao Dataset")
     with st.expander("Colunas removidas:"):
-        st.markdown("- nome\n- n_pokedex\n- tipo\n- evolui_de\n- pode_evoluir\n- habilidades\n- grupo_de_ovos")
+        st.markdown("- nome\n- n_pokedex\n- tipo\n- evolui_de\n- pode_evoluir\n- habilidades\n- grupo_de_ovos\n- lendário\n- mítico")
     st.write("\n")
     ds_class = ds.copy()
 
@@ -137,8 +144,15 @@ def main():
  
     ds_class.drop(['abilities', 'can_evolve', 'evolves_from', 'name', 'egg_groups'], axis=1, inplace=True)
 
-    st.dataframe(ds_class.iloc[0:25])
+    with st.expander('Resumo do dataset após a após a transformação dos dados e remoção das colunas:'):
+        st.dataframe(ds_class.iloc[0:25])
     st.write('\n')
+    st.markdown(
+        """
+        ## Algoritmo de Classificação Por Árvore de Decisão
+        """
+    )
+
     st.markdown(
         """
         ### Matriz de confusão
