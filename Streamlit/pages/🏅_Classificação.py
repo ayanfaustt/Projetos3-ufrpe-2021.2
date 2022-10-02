@@ -155,7 +155,7 @@ def main():
  
     ds_class.drop(['abilities', 'can_evolve', 'evolves_from', 'name', 'egg_groups'], axis=1, inplace=True)
 
-    with st.expander('Resumo do dataset após a após a transformação dos dados e remoção das colunas:'):
+    with st.expander('Resumo do dataset após a transformação dos dados e remoção das colunas:'):
         st.dataframe(ds_class.iloc[0:25])
     st.write('\n')
     st.markdown(
