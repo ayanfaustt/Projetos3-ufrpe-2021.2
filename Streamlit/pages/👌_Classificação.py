@@ -3,6 +3,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 import streamlit as st
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import classification_report
@@ -229,6 +232,115 @@ def main():
     plt.title('Curva ROC Árvore de Decisão')
     plt.legend(loc="lower right", fontsize=20) 
     st.pyplot(plt, clear_figure=True)
+
+    st.text("\n")
+
+    st.markdown(
+        """
+        ### Outros métodos de Classificação
+        """
+    )
+
+    st.write('O algoritmo de classificação arvore binária foi escolhido por ser o que teve mais eficácia etc etc')
+    st.write('Foram gerados também os gráficos KNN e e Regressão logísitca')
+
+    # Variaveis dos nomes das telas
+    # Tela que promove um resumo das colunas e dos dados
+    # Tela que exibe a Classificação Regressão Logística
+    option1 = "Classificação por Regressão Logística"
+    # Tela que exibe a Classificação KNN
+    option2 = "Classificação KNN"
+
+    option_list = [option1, option2]
+
+    # Cabeçalho de analise dos dados
+    # st.markdown(
+    #     """
+    #     ## Analise dos dados
+    #     """
+    # )
+
+    selected_view = st.selectbox('Selecione uma opção', option_list)
+    st.text("\n")
+
+    if selected_view == option1:
+        # with st.expander("Resultados:"):
+        # Criando modelo e treinando com os dados de treino
+        clr = LogisticRegression()
+        clr.fit(x_train, y_train)
+        # Fazendo a predição nos dados de treino
+        resultadoclr = clr.predict(x)
+
+        st.markdown(
+        """
+        ### Matriz de confusão
+        """
+        )
+
+        # Gerando plot da matriz de confusão
+        labels = list(clr.classes)
+        fig, ax = plt.subplots(figsize=(10,10))
+        matriz = confusion_matrix(y, resultado_clr, labels=labels)
+        sns.heatmap(matriz, annot=True, xticklabels=labels, yticklabels=labels,vmax= 900, fmt='d')
+        st.write(fig)
+
+        st.markdown(
+        """
+        ### Curva ROC
+        """
+        )
+
+        # Definindo algumas variáveis para cálculo da curva ROC
+        y_score = clr.predict_proba(x_test)
+        y_test_roc = pd.get_dummies(y_test).values
+        n_classes = 2
+        lw = 2
+        # Calculando a curva ROC para cada classe
+        fpr = dict()
+        tpr = dict()
+        roc_auc = dict()
+        for i in range(nclasses):
+            fpr[i], tpr[i],  = roc_curve(y_test_roc[:,i], y_score[:,i])
+            roc_auc[i] = auc(fpr[i], tpr[i])
+        # Gerando a curva ROC para cada classe, com cores diferentes para cada classe
+        plt.figure()
+        colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
+        for i, color, classes in zip(range(nclasses), colors, clr.classes):
+            plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='{0} (area = {1:0.3f})'.format(classes, roc_auc[i]))
+        # Configurações de eixos, legenda e título
+        plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+        plt.xlim([-0.05, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('Especificidade', fontsize=20)
+        plt.ylabel('Sensibilidade', fontsize=20)
+        plt.title('Curva ROC Regressão Logística')
+        plt.legend(loc="lower right", fontsize=20)
+        st.pyplot(plt, clear_figure=True)
+
+    if selected_view == option2:
+        # with st.expander("Resultados:"):
+        st.markdown(
+        """
+        ### Matriz de confusão
+        """
+        )
+        # Criando modelo e treinando com os dados de treino
+        knn = KNeighborsClassifier()
+        knn.fit(x_train, y_train)
+        # Fazendo a predição nos dados de treino
+        resultadoknn = knn.predict(x)
+
+        labels = list(knn.classes)
+        fig, ax = plt.subplots(figsize=(10,10))
+        matriz = confusion_matrix(y, resultado_knn, labels=labels)
+        sns.heatmap(matriz, annot=True, xticklabels=labels, yticklabels=labels, vmax= 900, fmt='d')
+        st.write(fig)
+
+        st.markdown(
+        """
+        ### Curva ROC
+        """
+        )
 
 if __name__ == '__main__':
     main()
