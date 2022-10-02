@@ -3,10 +3,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 import streamlit as st
-
+from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -241,8 +240,7 @@ def main():
         """
     )
 
-    st.write('O algoritmo de classificação arvore binária foi escolhido por ser o que teve mais eficácia etc etc')
-    st.write('Foram gerados também os gráficos KNN e e Regressão logísitca')
+    st.write('O algoritmo de classificação arvore binária foi escolhido por ser o que teve mais eficácia, com a finalidade de avaliar dos modelos de classificação KNN e Regressão logísitca veremos adiante os avaliadores de desempenho dos classificadores.')
 
     # Variaveis dos nomes das telas
     # Tela que promove um resumo das colunas e dos dados
@@ -269,7 +267,7 @@ def main():
         clr = LogisticRegression()
         clr.fit(x_train, y_train)
         # Fazendo a predição nos dados de treino
-        resultadoclr = clr.predict(x)
+        resultado_clr = clr.predict(x)
 
         st.markdown(
         """
@@ -278,7 +276,7 @@ def main():
         )
 
         # Gerando plot da matriz de confusão
-        labels = list(clr.classes)
+        labels = list(clr.classes_)
         fig, ax = plt.subplots(figsize=(10,10))
         matriz = confusion_matrix(y, resultado_clr, labels=labels)
         sns.heatmap(matriz, annot=True, xticklabels=labels, yticklabels=labels,vmax= 900, fmt='d')
@@ -299,13 +297,13 @@ def main():
         fpr = dict()
         tpr = dict()
         roc_auc = dict()
-        for i in range(nclasses):
-            fpr[i], tpr[i],  = roc_curve(y_test_roc[:,i], y_score[:,i])
+        for i in range(n_classes):
+            fpr[i], tpr[i], _ = roc_curve(y_test_roc[:,i], y_score[:,i])
             roc_auc[i] = auc(fpr[i], tpr[i])
         # Gerando a curva ROC para cada classe, com cores diferentes para cada classe
         plt.figure()
         colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
-        for i, color, classes in zip(range(nclasses), colors, clr.classes):
+        for i, color, classes in zip(range(n_classes), colors, clr.classes_):
             plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='{0} (area = {1:0.3f})'.format(classes, roc_auc[i]))
         # Configurações de eixos, legenda e título
         plt.plot([0, 1], [0, 1], 'k--', lw=lw)
@@ -328,9 +326,9 @@ def main():
         knn = KNeighborsClassifier()
         knn.fit(x_train, y_train)
         # Fazendo a predição nos dados de treino
-        resultadoknn = knn.predict(x)
+        resultado_knn = knn.predict(x)
 
-        labels = list(knn.classes)
+        labels = list(knn.classes_)
         fig, ax = plt.subplots(figsize=(10,10))
         matriz = confusion_matrix(y, resultado_knn, labels=labels)
         sns.heatmap(matriz, annot=True, xticklabels=labels, yticklabels=labels, vmax= 900, fmt='d')
@@ -341,6 +339,32 @@ def main():
         ### Curva ROC
         """
         )
+        
+        y_score = knn.predict_proba(x)
+        y_test_roc = pd.get_dummies(y).values
+        n_classes = 2
+        lw = 2
+        # Calculando a curva ROC para cada classe
+        fpr = dict()
+        tpr = dict()
+        roc_auc = dict()
+        for i in range(n_classes):
+            fpr[i], tpr[i], _ = roc_curve(y_test_roc[:,i], y_score[:,i])
+            roc_auc[i] = auc(fpr[i], tpr[i])
+        # Gerando a curva ROC para cada classe, com cores diferentes para cada classe
+        plt.figure()
+        colors = cycle(['darkorange', 'cornflowerblue'])
+        for i, color, classes in zip(range(n_classes), colors, knn.classes_):
+            plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='{0} (area = {1:0.3f})'.format(classes, roc_auc[i]))
+        # Configurações de eixos, legenda e título
+        plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+        plt.xlim([-0.05, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('Especificidade', fontsize=20)
+        plt.ylabel('Sensibilidade', fontsize=20)
+        plt.title('Curva ROC KNN')
+        plt.legend(loc="lower right", fontsize=20) 
+        st.pyplot(plt, clear_figure=True)
 
 if __name__ == '__main__':
     main()
