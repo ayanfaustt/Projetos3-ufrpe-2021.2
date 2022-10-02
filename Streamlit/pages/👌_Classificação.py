@@ -12,10 +12,11 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve
 from sklearn.metrics import auc
 from itertools import cycle
-
+from contextlib import contextmanager, redirect_stdout
+from io import StringIO
 
 st.set_page_config(
-    page_title="CLassificação",
+    page_title="Classificação",
     page_icon="👌",
 )
 
@@ -106,6 +107,19 @@ def pokeId(ds):
     
     return ds
 
+@contextmanager
+def st_capture(output_func):
+    with StringIO() as stdout, redirect_stdout(stdout):
+        old_write = stdout.write
+
+        def new_write(string):
+            ret = old_write(string)
+            output_func(stdout.getvalue())
+            return ret
+        
+        stdout.write = new_write
+        yield
+
 def main():
     path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.parquet"
     ds = pd.read_parquet(path_to_dataset)
@@ -154,6 +168,24 @@ def main():
         ## Algoritmo de Classificação Por Árvore de Decisão
         """
     )
+    
+    x = ds_class.drop(columns = ['legendary', 'mythical','pokedex_number', 'ml'])
+    y = ds_class.ml
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.8)
+    x_number = x.id
+
+    dtc = DecisionTreeClassifier()
+    dtc.fit(x_train, y_train)
+    resultado_dtc = dtc.predict(x)
+
+    st.markdown(
+        """
+        ### Classification Report
+        """
+    )
+    output = st.empty()
+    with st_capture(output.code):
+        print(classification_report(y, resultado_dtc))
 
     st.markdown(
         """
@@ -164,30 +196,10 @@ def main():
     st.write(
             "A matriz de confusão é uma tabela que representa os acertos e erros de uma classificação. Dessa forma é possível fazer cálculos de performance através destes resultados obtidos como vamos ver a seguir.")
 
-
-
-    x = ds_class.drop(columns = ['legendary', 'mythical','pokedex_number', 'ml'])
-    y = ds_class.ml
-
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.8)
-
-    x_number = x.id
-
-    # Criando modelo e treinando com os dados de treino
-    dtc = DecisionTreeClassifier()
-    dtc.fit(x_train, y_train)
-    # Fazendo a predição nos dados de treino
-    resultado_dtc = dtc.predict(x)
-   
-    # st.write(classification_report(y, resultado_dtc))
-
-    # print heatmap
     labels = list(dtc.classes_)
-
     fig, ax = plt.subplots(figsize=(10,10))
     matriz = confusion_matrix(y, resultado_dtc, labels=labels)
     sns.heatmap(matriz, annot=True, linewidths=.5, ax=ax, xticklabels=labels, yticklabels=labels, vmax= 900, fmt='d')
-
     st.write(fig)
     st.write('\n')
 
