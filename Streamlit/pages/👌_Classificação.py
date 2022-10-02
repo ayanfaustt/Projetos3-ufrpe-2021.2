@@ -244,7 +244,7 @@ def main():
 
     st.markdown(
         """
-        ## Outros métodos de Classificação
+        # Outros Algoritmos de Classificação
         """
     )
 
@@ -260,6 +260,11 @@ def main():
     st.text("\n")
 
     if selected_view == option1:
+        st.markdown(
+            """
+            ## Algoritmo de Classificação por Regressão Logística
+            """
+        )
         # Criando modelo e treinando com os dados de treino
         clr = LogisticRegression()
         clr.fit(x_train, y_train)
@@ -323,6 +328,11 @@ def main():
         st.pyplot(plt, clear_figure=True)
 
     if selected_view == option2:
+        st.markdown(
+            """
+            ## Algoritmo de Classificação KNN
+            """
+        )
         # Criando modelo e treinando com os dados de treino
         knn = KNeighborsClassifier()
         knn.fit(x_train, y_train)
