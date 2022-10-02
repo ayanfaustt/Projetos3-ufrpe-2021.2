@@ -123,8 +123,6 @@ def st_capture(output_func):
 def main():
     path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.parquet"
     ds = pd.read_parquet(path_to_dataset)
-
-
     
     st.title("Classificação")   
 
@@ -140,16 +138,13 @@ def main():
     st.write('\n')
     st.write("As colunas categóricas nominais foram reajustadas utilizando **one-hot-encoding**, que transforma todos os valores unicos de uma coluna categórica em novas colunas com valor 1 ou 0.")
     st.write("Ocorrências que apresentavam o valor categórico terão o valor 1 na nova coluna e 0, caso não.")
-    # Refatorar linha abaixo
-    st.write("Foi adicionada uma coluna “ml” que soma a coluna de pokemóns legendários e míticos, pois, pokemóns míticos são considerados tipos de pokémons lendários.") 
+    st.write("Foi adicionada uma coluna “ml” que soma a coluna de pokemóns lendários e míticos, pois, pokemóns míticos são considerados sublasses de pokémons lendários.") 
     st.write("Removemos as colunas categóricas com maior quantidade de valores unicos, assim como algumas colunas de identificadores unicos que não entram no escopo de agrupamento, além de colunas poderiam facilmente identifcar pokémons lendários através de seus dados.")
-    # st.write(
-    #         "Para realizar a classificação dos dados será necessário aplicar o One Hot Encoding ao Dataset")
     with st.expander("Colunas removidas:"):
         st.markdown("- nome\n- n_pokedex\n- tipo\n- evolui_de\n- pode_evoluir\n- habilidades\n- grupo_de_ovos\n- lendário\n- mítico")
     st.write("\n")
+    
     ds_class = ds.copy()
-
     ds_class['ml'] = ds_class['legendary'] + ds_class['mythical']
     ds_class = pokeId(ds_class)
     ds_class = typeConversion(ds_class)
@@ -183,6 +178,7 @@ def main():
         ### Classification Report
         """
     )
+    
     output = st.empty()
     with st_capture(output.code):
         print(classification_report(y, resultado_dtc))
@@ -201,9 +197,9 @@ def main():
     matriz = confusion_matrix(y, resultado_dtc, labels=labels)
     sns.heatmap(matriz, annot=True, linewidths=.5, ax=ax, xticklabels=labels, yticklabels=labels, vmax= 900, fmt='d')
     st.write(fig)
+    
     st.write('\n')
 
-    st.write('\n')
     st.markdown(
         """
         ### Curva ROC
@@ -244,7 +240,7 @@ def main():
     plt.legend(loc="lower right", fontsize=20) 
     st.pyplot(plt, clear_figure=True)
 
-    st.text("\n")
+    st.write("\n")
 
     st.markdown(
         """
@@ -263,18 +259,10 @@ def main():
 
     option_list = [option1, option2]
 
-    # Cabeçalho de analise dos dados
-    # st.markdown(
-    #     """
-    #     ## Analise dos dados
-    #     """
-    # )
-
     selected_view = st.selectbox('Selecione uma opção', option_list)
     st.text("\n")
 
     if selected_view == option1:
-        # with st.expander("Resultados:"):
         # Criando modelo e treinando com os dados de treino
         clr = LogisticRegression()
         clr.fit(x_train, y_train)
@@ -328,7 +316,6 @@ def main():
         st.pyplot(plt, clear_figure=True)
 
     if selected_view == option2:
-        # with st.expander("Resultados:"):
         st.markdown(
         """
         ### Matriz de confusão
