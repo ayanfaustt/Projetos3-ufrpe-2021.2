@@ -197,7 +197,7 @@ def main():
     matriz = confusion_matrix(y, resultado_dtc, labels=labels)
     sns.heatmap(matriz, annot=True, linewidths=.5, ax=ax, xticklabels=labels, yticklabels=labels, vmax= 900, fmt='d')
     st.write(fig)
-    
+
     st.write('\n')
 
     st.markdown(
@@ -244,17 +244,14 @@ def main():
 
     st.markdown(
         """
-        ### Outros métodos de Classificação
+        ## Outros métodos de Classificação
         """
     )
 
     st.write('O algoritmo de classificação arvore binária foi escolhido por ser o que teve mais eficácia, com a finalidade de avaliar dos modelos de classificação KNN e Regressão logísitca veremos adiante os avaliadores de desempenho dos classificadores.')
 
     # Variaveis dos nomes das telas
-    # Tela que promove um resumo das colunas e dos dados
-    # Tela que exibe a Classificação Regressão Logística
     option1 = "Classificação por Regressão Logística"
-    # Tela que exibe a Classificação KNN
     option2 = "Classificação KNN"
 
     option_list = [option1, option2]
@@ -268,6 +265,16 @@ def main():
         clr.fit(x_train, y_train)
         # Fazendo a predição nos dados de treino
         resultado_clr = clr.predict(x)
+
+        st.markdown(
+            """
+            ### Classification Report
+            """
+        )
+    
+        output = st.empty()
+        with st_capture(output.code):
+            print(classification_report(y, resultado_clr))
 
         st.markdown(
         """
@@ -316,16 +323,27 @@ def main():
         st.pyplot(plt, clear_figure=True)
 
     if selected_view == option2:
-        st.markdown(
-        """
-        ### Matriz de confusão
-        """
-        )
         # Criando modelo e treinando com os dados de treino
         knn = KNeighborsClassifier()
         knn.fit(x_train, y_train)
         # Fazendo a predição nos dados de treino
         resultado_knn = knn.predict(x)
+
+        st.markdown(
+            """
+            ### Classification Report
+            """
+        )
+    
+        output = st.empty()
+        with st_capture(output.code):
+            print(classification_report(y, resultado_knn))
+
+        st.markdown(
+        """
+        ### Matriz de confusão
+        """
+        )
 
         labels = list(knn.classes_)
         fig, ax = plt.subplots(figsize=(10,10))
