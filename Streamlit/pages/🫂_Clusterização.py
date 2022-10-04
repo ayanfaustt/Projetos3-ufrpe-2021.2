@@ -89,40 +89,40 @@ def typeConversion(dataFrame):
     return dataFrame
 
 
-# def colummConversion(dataFrame, col):
-#     unique_val = dataFrame[col].unique()
-#     ds_aux = pd.DataFrame(columns=unique_val)
-#     var_iterator = [itemlist for itemlist in unique_val]
-#     for index in range(len(dataFrame)):
-#         dataAux = list()
-#         current_val = dataFrame.loc[index, col]
-#         for index_i in var_iterator:
-#           if current_val == index_i:
-#             dataAux.append(1)
-#           else:
-#             dataAux.append(0)
-#         ds_aux.loc[index] = dataAux
-
-#     new_dataFrame = pd.concat([dataFrame, ds_aux], axis= 1)
-#     new_dataFrame.drop([col], axis=1, inplace=True)
-#     return new_dataFrame
-
 def colummConversion(dataFrame, col):
-
     unique_val = dataFrame[col].unique()
-
+    ds_aux = pd.DataFrame(columns=unique_val)
     var_iterator = [itemlist for itemlist in unique_val]
     for index in range(len(dataFrame)):
-        varIterator_aux = var_iterator[:]
+        dataAux = list()
         current_val = dataFrame.loc[index, col]
-        dataFrame.loc[index, current_val] = 1
-        varIterator_aux.pop(varIterator_aux.index(current_val))
-        for index_i in varIterator_aux:
-            dataFrame.loc[index, index_i] = 0
+        for index_i in var_iterator:
+          if current_val == index_i:
+            dataAux.append(1)
+          else:
+            dataAux.append(0)
+        ds_aux.loc[index] = dataAux
 
-    dataFrame.drop([col], axis=1, inplace=True)
+    new_dataFrame = pd.concat([dataFrame, ds_aux], axis= 1)
+    new_dataFrame.drop([col], axis=1, inplace=True)
+    return new_dataFrame
 
-    return dataFrame
+# def colummConversion(dataFrame, col):
+
+#     unique_val = dataFrame[col].unique()
+
+#     var_iterator = [itemlist for itemlist in unique_val]
+#     for index in range(len(dataFrame)):
+#         varIterator_aux = var_iterator[:]
+#         current_val = dataFrame.loc[index, col]
+#         dataFrame.loc[index, current_val] = 1
+#         varIterator_aux.pop(varIterator_aux.index(current_val))
+#         for index_i in varIterator_aux:
+#             dataFrame.loc[index, index_i] = 0
+
+#     dataFrame.drop([col], axis=1, inplace=True)
+
+#     return dataFrame
 
 
 def main():
@@ -181,11 +181,11 @@ def main():
     ds.columns = colunas
     st.header("Clusterização")
     st.write(
-        "Foram criados 2 clusters experimentais baseados nas propostas do nosso projeto.")
-    st.write("Para ambos foi usado o algoritmo K-means.")
-    st.subheader("Cluster 1")
+        """Aplicação do algoritmo Kmeans para a formação dos clusters de Pokémon"""
+    )
+    st.subheader("Preparação da Base de Dados")
     st.write(
-        "Este cluster foi criado utilizando a maioria das colunas do dataset, sendo elas: ")
+        "Para a criação dos cluster serão utilizados os seguintes atributos: ")
     colunas_cluster_all = ['tipo',
                            'vida',
                            'ataque',
@@ -277,9 +277,9 @@ def main():
                          'padrao',
                          'forma_temporaria', ]
     markdown_colunas_string = ''
-    for coluna in colunas:
+    for coluna in colunas_cluster_all:
         markdown_colunas_string += "- " + coluna + "\n"
-    with st.expander("Colunas utilizadas:"):
+    with st.expander("Atributos utilizados:"):
         st.markdown(markdown_colunas_string)
     st.write("As colunas categóricas nominais foram reajustadas utilizando **one-hot-encoding**, que transforma todos os valores unicos de uma coluna categórica em novas colunas com valor 1 ou 0.")
     st.write("Ocorrências que apresentavam o valor categórico terão o valor 1 na nova coluna e 0, caso não.")
@@ -288,11 +288,13 @@ def main():
     with st.expander("Colunas removidas:"):
         st.markdown("- nome\n- n_pokedex\n- tipo\n- evolui_de")
     st.write("\n")
-    st.write("Para a clusterização, alem da transformação **one-hot-encoding** nas colunas categóricas nominais, foi aplicada a normalização dos valores quantitativos e categóricos ordinais.")
-    ds_normalized = ds[colunas_quantitativas_ordinais +
-                       colunas_categorias_nominais+colunas_booleanas]
-    ds_com_cluster = ds[colunas_quantitativas_ordinais +
-                        colunas_categorias_nominais+colunas_booleanas]
+    st.write("Para a clusterização, além da transformação **one-hot-encoding** nas colunas categóricas nominais, foi aplicada a **normalização** dos valores quantitativos e categóricos ordinais.")
+    
+    #Criação dos Clusters
+    ds_normalized = ds[colunas_quantitativas_ordinais+colunas_categorias_nominais+colunas_booleanas]
+    ds_com_cluster = ds[colunas]
+    
+    #Normalização dos Dados
     for column in colunas_quantitativas_ordinais:
         ds_normalized[column] = (ds[column]-ds[column].min()) / (
             ds[column].max()-ds[column].min())
@@ -300,20 +302,18 @@ def main():
     colunas_categodicas_but_tipo = colunas_categorias_nominais.copy()
     colunas_categodicas_but_tipo.remove("habilidades")
 
-    # ds_normalized = colummConversion(ds_normalized, 'forma')
-    # st.dataframe(ds_normalized)
-
+    #One Hot Encoding
     for coluna in colunas_categodicas_but_tipo:
-        print(coluna)
-        ds_normalized = colummConversion(ds_normalized, coluna)
+        ds_normalized = colummConversion(ds_normalized,coluna) 
+    #Conversão de booleano
     for coluna in colunas_booleanas:
         ds_normalized[coluna] = ds_normalized[coluna].astype(int)
 
     st.write("Resumo do dataset após a normalização dos valores:")
-    with st.expander("dataset formatado:"):
+    with st.expander("dataset transformado:"):
         st.dataframe(ds_normalized.describe())
+    
 
-    scale = StandardScaler()
     wcss = []
     wcss_range = range(2, 50)
     for n in wcss_range:
@@ -322,6 +322,7 @@ def main():
         cluster_builder.fit(ds_normalized)
         wcss.append(cluster_builder.inertia_)
 
+    #Gráfico do Cotovelo
     plt.plot(wcss_range, wcss, 'bx-')
     plt.xlabel('Número de clusters')
     plt.ylabel('Inercia')
@@ -339,7 +340,7 @@ def main():
     # plt.ylabel('Coeficiente de silhueta')
     # plt.title('Metodo da silhueta')
     # st.pyplot(plt, clear_figure=True)
-    range_n_clusters = [2,3,4,5,6,7,8,9]
+    range_n_clusters = [2,3,4,5,6,7,8,9,15,25,50]
     for n in range_n_clusters:
         plt.xlim((-0.1, 1))
         plt.ylim([0, len(ds_normalized)+(n + 1)*10])
@@ -374,25 +375,23 @@ def main():
         plt.ylabel("Clusters")
         plt.axvline(x=silhouette_avg, color='red', linestyle='--')
         plt.savefig('fig'+str(n))
+        plt.clf()
     # st.pyplot(plt, clear_figure=True)
 
+    #Formação dos Clusters
     kmeans_f = KMeans(n_clusters=15, init='k-means++', random_state=10)
     kmeans_f.fit(ds_normalized)
     ds_normalized['clusters'] = kmeans_f.labels_
     ds_com_cluster['clusters'] = kmeans_f.labels_
 
-    # range_colunas = ds_normalized.columns
-    # centroids = pd.DataFrame(scale.inverse_transform(kmeans_f.cluster_centers_))
-    # centroids.columns = range_colunas
-    # centroids['clusters'] = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
     st.write('\n')
     st.header('Informações sobre os clusters')
     sns.set(font_scale=2)
     st.write("\n")
-    sns.pairplot(ds_com_cluster[['vida', 'ataque', 'defesa', 'ataque_especial',
-                 'defesa_especial', 'velocidade', 'clusters']], hue="clusters")
-    plt.title('Dispersão dos Status Básicos entre os clusters')
-    st.pyplot(plt, clear_figure=True)
+    # sns.pairplot(ds_com_cluster[['vida', 'ataque', 'defesa','ataque_especial','defesa_especial','velocidade', 'clusters']], hue="clusters" )
+    # plt.title('Dispersão dos Status Básicos entre os clusters')
+    # st.pyplot(plt, clear_figure=True)
+
     st.write("\n")
 
     sns.countplot(x=ds_com_cluster['clusters'], palette=["#0B50E3", "#0075FA"])
@@ -402,7 +401,7 @@ def main():
     st.pyplot(plt, clear_figure=True)
     st.write("""
         O gŕafico acima exibe a quantidade de pokémons distribuídos em cada cluster. Observa-se 
-        que os clusters 1 e 6 possuem a maior quantidade de pokémons.
+        que o cluster 5 apresenta a maior quantidade de Pokémon e enquanto o 10 é o oposto.
     """)
 
     cluster_mean = pd.DataFrame(ds_com_cluster.groupby(['clusters']).agg({
@@ -416,13 +415,218 @@ def main():
     st.dataframe(cluster_mean)
     st.write('\n')
     st.write("""
-        Na tabela acima consta as médias dos atributos vida, ataque, defesa, ataque_especial, defesa_especial e velocidade.
+        Na tabela acima consta as médias dos atributos **vida**, **ataque**, **defesa**, **ataque_especial**, **defesa_especial** e **velocidade**.
         De maneira geral, observa-se que os clusters apresentam valores semelhantes.
-        Porém há clusters que apresentam dados mais expressivos como o 3 que não apresenta nenhum atributo com média inferior a 90,
-        isso implica que, neste cluster, há pokémons lendários. O cluster 10 também apresenta dados significativos,
-        apesar de inferiores em relação aos primeiros. O cluster 2 apresenta as menores médias em quase todos os campos, indicando
+        Porém há clusters que apresentam dados mais expressivos como o 5 que não apresenta nenhum atributo com média inferior a 90,
+        isso implica que, neste cluster, há pokémons lendários pelos menos em sua maioria, porém faz-se necessária uma investigação para 
+        validar isto, uma vez que este cluster é o que apresenta a maior quantidade de pokémon. 
+        O cluster 13 também apresenta dados significativos,
+        apesar de inferiores em relação aos primeiros. O cluster 11 apresenta todas as suas médias abaixo de 60, indicando
         que a maioria das suas ocorrências são pokémon de estágio 0.
     """)
+
+    option_cluster = [5,10,11,13]
+    st.write('\n')
+    st.subheader('Analisando Clusters')
+    selected_view = st.selectbox('Selecione uma opção', option_cluster)
+
+    colunas_do_cluster=['vida','ataque','defesa','defesa_especial','ataque_especial','velocidade']
+
+    #Cluster 5
+    if selected_view == 5:
+
+        st.subheader('Cluster 5')
+        st.write("""
+            Para averiguar as suposições levantas anteriorimente quanto aos pokémons lendários contidos neste cluster.
+            Será realizada a contagem dos Pokémon lendários.
+        """)
+        st.write('\n')
+        cluster5 = ds_com_cluster[ds_com_cluster['clusters'] == 5].copy()
+        sns.countplot(x=cluster5['lendario'], palette=["#0B50E3","#0075FA"])
+        plt.title('Pokémon lendários no Cluster 5')
+        plt.ylabel('Quantidade')
+        st.pyplot(plt, clear_figure=True)
+        st.write("""
+            O Gráfico acima confirma a existência de pokémom lendários, sendo estes a maioria que compõe o cluster e este fato explica 
+            a ocorrência de médias mais altas em relação aos demais agrupamentos.
+        """)
+        st.write('\n')
+        sns.countplot(x=cluster5['forma_temporaria'], palette=["#0B50E3", "#0075FA"])
+        plt.title('Pokémon com forma temporária no Cluster 5')
+        plt.ylabel('Quantidade')
+        st.pyplot(plt, clear_figure=True)
+        st.write("""
+            O gráfico acima exibe os pokémon que são formas temporárias. Eles correspondem a uma parte considerável do cluster.
+        """)
+        st.write('\n')
+        st.write("""
+            O dois gráficos acima, além de comprovar a existência dos pokémons lendários neste cluster, também 
+            mostra que há pokémon que são tão fortes que chegam perto dos pokémons lendarios
+        """)
+        
+        cluster5['lendario'] = cluster5['lendario'].astype(int)
+        cluster5['mitico'] = cluster5['mitico'].astype(int)
+        cluster5['forma_temporaria'] = cluster5['forma_temporaria'].astype(int)
+
+        st.write('\n')
+        colunas_pairplot = st.multiselect('Selecione até 4 colunas para o Pairplot', colunas_do_cluster, key=1)
+        
+
+        if st.button('Gerar Pairplot'):
+            with st.expander("Resultados:"):
+                n_colunas = len(colunas_pairplot)
+                if n_colunas > 4 or n_colunas < 1:
+                    st.write("Selecione entre 1 e 4 colunas!")
+                else:
+                    plt.rcParams.update({'font.size': 6})
+                    plt.figure(figsize=(5, 5))
+                    pairplot_data = pd.melt(
+                        cluster5, id_vars=['n_pokedex'], value_vars=colunas_pairplot)
+                    fig = px.scatter_matrix(
+                        cluster5, dimensions=colunas_pairplot, color='lendario')
+                    fig.update_traces(diagonal_visible=False)
+                    fig.update_layout(
+                        title='Dispersão',
+                    )
+                    plt.title("Pairplot")
+                    plt.xlabel("Colunas")
+                    plt.ylabel("Valor")
+                    st.plotly_chart(fig)
+
+    #Cluster 10
+    elif selected_view == 10:
+
+        st.subheader('Cluster 10')
+        st.write("""
+            Este Cluster além de ter as médias consideravelmente baixas, apresenta o menor número de pokémon.
+        """)
+        st.write('\n')
+        cluster10 = ds_com_cluster[ds_com_cluster['clusters'] == 10]
+        st.dataframe(cluster10.iloc[0:18,0:13])
+        st.write('\n')
+        st.write("""
+            Devido ao fato de ser um cluster pequeno, é possível obter uma visualização simples dos pokémon integrantes.
+            Observa-se que o Cluster é composto por Pikachu e suas variantes além das evoluções.
+            Este Cluster originou-se devido ao fato de existir uma grande variedade de Pikachu, criando um cluster próprio.
+        """)
+
+        st.write('\n')
+        colunas_pairplot = st.multiselect('Selecione até 4 colunas para o Pairplot', colunas_do_cluster, key=1)
+
+        if st.button('Gerar Pairplot'):
+            with st.expander("Resultados:"):
+                n_colunas = len(colunas_pairplot)
+                if n_colunas > 4 or n_colunas < 1:
+                    st.write("Selecione entre 1 e 4 colunas!")
+                else:
+                    plt.rcParams.update({'font.size': 6})
+                    plt.figure(figsize=(5, 5))
+                    pairplot_data = pd.melt(
+                        cluster10, id_vars=['n_pokedex'], value_vars=colunas_pairplot)
+                    fig = px.scatter_matrix(
+                        cluster10, dimensions=colunas_pairplot)
+                    fig.update_traces(diagonal_visible=False)
+                    fig.update_layout(
+                        title='Dispersão',
+                    )
+                    plt.title("Pairplot")
+                    plt.xlabel("Colunas")
+                    plt.ylabel("Valor")
+                    st.plotly_chart(fig)
+
+    #Cluster 11
+    elif selected_view == 11:
+
+        st.subheader('Cluster 11')
+        st.write("""
+            O cluster 11 destacou-se por ser o agrupamento com as menores médias em seus atributos.
+        """)
+        cluster11 = ds_com_cluster[ds_com_cluster['clusters'] == 11]
+        filtro_1_cluster11 = cluster11[(cluster11['evoluivel'] == True) & cluster11['evolui_de'].isnull()] #pokémon estágio 0
+        
+        filtro_2_cluster11 = cluster11[(cluster11['evoluivel'] == False) & cluster11['evolui_de'].isnull()] # pokémon que não evolui
+        #Pokémon estágio 1 ou 2
+        filtro_3_cluster11 = cluster11.drop(filtro_1_cluster11.index)
+        filtro_3_cluster11 = filtro_3_cluster11.drop(filtro_2_cluster11.index)
+        st.write('\n')
+        x = [1,2,3]
+        plt.title('Estágios dos pokémon')
+        plt.bar(x, height=[filtro_1_cluster11['nome'].count(),filtro_2_cluster11['nome'].count(),filtro_3_cluster11['nome'].count()])
+        plt.xticks(x, ('Estágio 0','Pokémon sem evolução','Estágio 1'))
+        st.pyplot(plt, clear_figure=True)
+        st.write("""
+            O gráfico acima exibe a quantidade de pokémon que estão no estágio 0, sem evolução e outros.
+            É notório que os pokémons de estágio 0 são a maioria no cluster, jogando assim as médias gerais para baixo.
+        """)
+
+        st.write('\n')
+        colunas_pairplot = st.multiselect('Selecione até 4 colunas para o Pairplot', colunas_do_cluster, key=1)
+
+        if st.button('Gerar Pairplot'):
+            with st.expander("Resultados:"):
+                n_colunas = len(colunas_pairplot)
+                if n_colunas > 4 or n_colunas < 1:
+                    st.write("Selecione entre 1 e 4 colunas!")
+                else:
+                    plt.rcParams.update({'font.size': 6})
+                    plt.figure(figsize=(5, 5))
+                    pairplot_data = pd.melt(
+                        cluster11, id_vars=['n_pokedex'], value_vars=colunas_pairplot)
+                    fig = px.scatter_matrix(
+                        cluster11, dimensions=colunas_pairplot)
+                    fig.update_traces(diagonal_visible=False)
+                    fig.update_layout(
+                        title='Dispersão',
+                    )
+                    plt.title("Pairplot")
+                    plt.xlabel("Colunas")
+                    plt.ylabel("Valor")
+                    st.plotly_chart(fig)
+
+    #Cluster 13
+    elif selected_view == 13:
+
+        st.subheader('Cluster 13')
+        st.write("""
+            Este Cluster apresenta médias semelhantes as do cluster 5 e, devido a isso, vamos
+            exibir algumas informações do agrupamento a fim de entender o porque da semelhança entre os clusters.
+        """)
+        st.write('\n')
+        cluster13 = ds_com_cluster[ds_com_cluster['clusters'] == 13]
+        sns.countplot(x=cluster13['forma_temporaria'], palette=["#0B50E3", "#0075FA"])
+        plt.title('Pokémon com forma temporária no Cluster 13')
+        plt.ylabel('Quantidade')
+        st.pyplot(plt, clear_figure=True)
+        st.write("""
+            O gŕafico acima por si só já aponta a principal diferença em relação ao cluster 5. Pokémon em forma temporária
+            recebem, em geral, um grande aumento em seus status, assemelhando-se, em alguns casos, aos Pokémon lendários.
+        """)
+
+       
+
+        colunas_pairplot = st.multiselect('Selecione até 4 colunas para o Pairplot', colunas_do_cluster, key=1)
+
+        if st.button('Gerar Pairplot'):
+            with st.expander("Resultados:"):
+                n_colunas = len(colunas_pairplot)
+                if n_colunas > 4 or n_colunas < 1:
+                    st.write("Selecione entre 1 e 4 colunas!")
+                else:
+                    plt.rcParams.update({'font.size': 6})
+                    plt.figure(figsize=(5, 5))
+                    pairplot_data = pd.melt(
+                        cluster13, id_vars=['n_pokedex'], value_vars=colunas_pairplot)
+                    fig = px.scatter_matrix(
+                        cluster13, dimensions=colunas_pairplot)
+                    fig.update_traces(diagonal_visible=False)
+                    fig.update_layout(
+                        title='Dispersão',
+                    )
+                    plt.title("Pairplot")
+                    plt.xlabel("Colunas")
+                    plt.ylabel("Valor")
+                    st.plotly_chart(fig)
+    st.text("\n")
 
 
 if __name__ == '__main__':
