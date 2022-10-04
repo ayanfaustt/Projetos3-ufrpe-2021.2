@@ -152,6 +152,7 @@ def main():
     ds_class = colummConversion(ds_class, 'shape')
     ds_class = colummConversion(ds_class, 'primary_color')
     ds_class = convertBoleanValues(ds_class)
+    ds = pokeId(ds)
  
     ds_class.drop(['abilities', 'can_evolve', 'evolves_from', 'name', 'egg_groups'], axis=1, inplace=True)
 
@@ -244,6 +245,28 @@ def main():
 
     st.markdown(
         """
+        ### Resultados do algoritmo
+        """
+    )
+
+    pokedex = x_number
+    count = 0
+
+    output = st.empty()
+    with st_capture(output.code):
+        for i in range(len(resultado_dtc)):
+            if resultado_dtc[i] == True and y.iloc[i] == False:
+                count += 1
+                
+                pokedict = ds.loc[ds["id"] == pokedex.iloc[i]]['name'].to_dict()
+                pokemon = str(*pokedict.values())
+                print(pokedex.iloc[i], pokemon,'Classificado como:', resultado_dtc[i], "|| é lendario?", y.iloc[i])
+
+        print("Contagem de output:", count)
+
+
+    st.markdown(
+        """
         # Outros Algoritmos de Classificação
         """
     )
@@ -314,7 +337,7 @@ def main():
             roc_auc[i] = auc(fpr[i], tpr[i])
         # Gerando a curva ROC para cada classe, com cores diferentes para cada classe
         plt.figure()
-        colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
+        colors = cycle(['darkorange', 'cornflowerblue'])
         for i, color, classes in zip(range(n_classes), colors, clr.classes_):
             plt.plot(fpr[i], tpr[i], color=color, lw=lw, label='{0} (area = {1:0.3f})'.format(classes, roc_auc[i]))
         # Configurações de eixos, legenda e título
@@ -326,6 +349,24 @@ def main():
         plt.title('Curva ROC Regressão Logística')
         plt.legend(loc="lower right", fontsize=20)
         st.pyplot(plt, clear_figure=True)
+
+        st.markdown(
+        """
+        ### Resultados do algoritmo
+        """
+        )
+
+        output = st.empty()
+        with st_capture(output.code):
+            for i in range(len(resultado_clr)):
+                if resultado_clr[i] == True and y.iloc[i] == False:
+                    count += 1
+                    
+                    pokedict = ds.loc[ds["id"] == pokedex.iloc[i]]['name'].to_dict()
+                    pokemon = str(*pokedict.values())
+                    print(pokedex.iloc[i], pokemon,'Classificado como:', resultado_clr[i], "|| é lendario?", y.iloc[i])
+
+            print("Contagem de output:", count)
 
     if selected_view == option2:
         st.markdown(
@@ -392,6 +433,26 @@ def main():
         plt.title('Curva ROC KNN')
         plt.legend(loc="lower right", fontsize=20) 
         st.pyplot(plt, clear_figure=True)
+
+        count = 0
+
+        st.markdown(
+        """
+        ### Resultados do algoritmo
+        """
+        )
+
+        output = st.empty()
+        with st_capture(output.code):
+            for i in range(len(resultado_knn)):
+                if resultado_knn[i] == True and y.iloc[i] == False:
+                    count += 1
+                    
+                    pokedict = ds.loc[ds["id"] == pokedex.iloc[i]]['name'].to_dict()
+                    pokemon = str(*pokedict.values())
+                    print(pokedex.iloc[i], pokemon,'Classificado como:', resultado_knn[i], "|| é lendario?", y.iloc[i])
+
+            print("Contagem de output:", count)
 
 if __name__ == '__main__':
     main()
