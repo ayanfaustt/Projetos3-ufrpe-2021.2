@@ -14,7 +14,7 @@ from itertools import cycle
 
 st.set_page_config(
     page_title="CLassificação",
-    page_icon="👌",
+    page_icon="✅",
 )
 
 def typeConversion(dataFrame):
