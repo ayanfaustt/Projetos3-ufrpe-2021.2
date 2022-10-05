@@ -11,4 +11,4 @@ Libs necessarias:
  -plotly
 
  Para executar o projeto:
- - streamlit run 🏠Home.py
+ - streamlit run 🏠_Inicio.py
