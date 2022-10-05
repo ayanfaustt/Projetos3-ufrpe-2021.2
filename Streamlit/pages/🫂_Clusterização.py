@@ -13,41 +13,12 @@ import plotly.express as px
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_samples, silhouette_score
 from sklearn.preprocessing import StandardScaler
+import statsmodels.api as sm
 
 st.set_page_config(
     page_title="Clusterização",
     page_icon="🫂",
 )
-
-# def typeConversion(dataFrame):
-#     unique_val = dataFrame["tipo"].unique()
-
-#     type_iterator = list()
-#     for type in unique_val:
-#         if not ("~" in type):
-#             type_iterator.append(type)
-
-#     for i in range(len(dataFrame)):
-#         type_aux = type_iterator[:]
-#         if '~' in dataFrame.loc[i, 'tipo']:
-#             pokemon_types = dataFrame.loc[i, 'tipo'].split('~')
-#             dataFrame.loc[i, pokemon_types[0]] = int(1)
-#             dataFrame.loc[i, pokemon_types[1]] = int(1)
-#             type_aux.pop(type_aux.index(pokemon_types[0]))
-#             type_aux.pop(type_aux.index(pokemon_types[1]))
-#             for j in type_aux:
-#                 dataFrame.loc[i, j] = int(0)
-#         else:
-#             mono_type = dataFrame.loc[i, 'tipo']
-#             dataFrame.loc[i, mono_type] = int(1)
-#             type_aux.pop(type_aux.index(mono_type))
-#             for k in type_aux:
-#                 dataFrame.loc[i, k] = int(0)
-
-#     dataFrame.drop(['tipo'], axis=1, inplace=True)
-
-#     return dataFrame
-
 
 def typeConversion(dataFrame):
     unique_val = dataFrame["habilidades"].copy()
@@ -106,24 +77,6 @@ def colummConversion(dataFrame, col):
     new_dataFrame = pd.concat([dataFrame, ds_aux], axis= 1)
     new_dataFrame.drop([col], axis=1, inplace=True)
     return new_dataFrame
-
-# def colummConversion(dataFrame, col):
-
-#     unique_val = dataFrame[col].unique()
-
-#     var_iterator = [itemlist for itemlist in unique_val]
-#     for index in range(len(dataFrame)):
-#         varIterator_aux = var_iterator[:]
-#         current_val = dataFrame.loc[index, col]
-#         dataFrame.loc[index, current_val] = 1
-#         varIterator_aux.pop(varIterator_aux.index(current_val))
-#         for index_i in varIterator_aux:
-#             dataFrame.loc[index, index_i] = 0
-
-#     dataFrame.drop([col], axis=1, inplace=True)
-
-#     return dataFrame
-
 
 def main():
     path_to_dataset = os.path.join(os.getcwd(), os.pardir)+"/pokemon.parquet"
@@ -288,7 +241,23 @@ def main():
     with st.expander("Colunas removidas:"):
         st.markdown("- nome\n- n_pokedex\n- tipo\n- evolui_de")
     st.write("\n")
-    st.write("Para a clusterização, além da transformação **one-hot-encoding** nas colunas categóricas nominais, foi aplicada a **normalização** dos valores quantitativos e categóricos ordinais.")
+    st.markdown("""Para a clusterização, além da transformação **one-hot-encoding** nas colunas categórias nominais, realizamos testes de distribuição nas colunas quantitativas a fim de descobrir se
+                seria necessário normalizar os dados contidos nelas ou não. Para isso, plotamos gráficos q-q e histogramas, para descobrirmos se esses dados eram gaussianos ou não. E descobrimos que a grande
+                parte não era, portanto, foi necessário optarmos pela **normalização** desses dados.
+                
+                A baixo você pode observar a distribuição de cada coluna quantitativa:""")
+    
+
+    colunaSelecionada = st.multiselect(
+            'Selecione coluna para ver sua distribuição', colunas_quantitativas_ordinais)
+
+    if st.button('Gerar gráficos'):
+        plt.title(f"Histograma dos dados da coluna {colunaSelecionada[0]}")
+        plt.hist(ds[colunaSelecionada], rwidth=0.9)
+        st.pyplot(plt, clear_figure=True)
+
+        sm.qqplot(ds[colunaSelecionada[0]], line = "r")
+        st.pyplot(plt, clear_figure=True)
     
     #Criação dos Clusters
     ds_normalized = ds[colunas_quantitativas_ordinais+colunas_categorias_nominais+colunas_booleanas]
@@ -329,17 +298,7 @@ def main():
     plt.title('Metodo do cotovelo usando a inércia')
     st.pyplot(plt, clear_figure=True)
 
-    # silh_scores = []
-    # for n in wcss_range:
-    #     cluster_builder = KMeans(n_clusters=n, init='k-means++', random_state=10)
-    #     preds = cluster_builder.fit_predict(ds_normalized)
-    #     silh_scores.append(silhouette_score(ds_normalized, preds))
 
-    # plt.plot(wcss_range, silh_scores, 'bx-')
-    # plt.xlabel('Número de clusters')
-    # plt.ylabel('Coeficiente de silhueta')
-    # plt.title('Metodo da silhueta')
-    # st.pyplot(plt, clear_figure=True)
     range_n_clusters = [2,3,4,5,6,7,8,9,15,25,50]
     for n in range_n_clusters:
         plt.xlim((-0.1, 1))
@@ -388,9 +347,6 @@ def main():
     st.header('Informações sobre os clusters')
     sns.set(font_scale=2)
     st.write("\n")
-    # sns.pairplot(ds_com_cluster[['vida', 'ataque', 'defesa','ataque_especial','defesa_especial','velocidade', 'clusters']], hue="clusters" )
-    # plt.title('Dispersão dos Status Básicos entre os clusters')
-    # st.pyplot(plt, clear_figure=True)
 
     st.write("\n")
 
