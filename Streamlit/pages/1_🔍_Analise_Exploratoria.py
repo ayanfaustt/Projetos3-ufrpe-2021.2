@@ -182,7 +182,7 @@ def main():
     st.write('\n')
 
     ds_lendario = ds[ds['lendario'] == True]
-    st.dataframe(ds_lendario)
+    # st.dataframe(ds_lendario)
     
     plt.hist(x = ds_lendario['geracao'], color = "#0B50E3")
 
